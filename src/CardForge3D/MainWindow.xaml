@@ -25,7 +25,8 @@
                 BorderThickness="0,0,0,1"
                 Padding="6,4">
             <StackPanel Orientation="Horizontal">
-                <Button Content="📂 Open" Click="OpenImage_Click"/>
+                <Button Content="📂 Open Image" Click="OpenImage_Click"/>
+                <Button Content="Open Project" Click="OpenProject_Click"/>
                 <Button Content="💾 Save" Click="SaveProject_Click"/>
 
                 <Border Width="1" Height="24" Background="{StaticResource BorderColor}" Margin="8,0"/>

@@ -5,7 +5,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -847,6 +846,97 @@ public partial class MainWindow : Window
             MessageBox.Show(
                 $"Could not save project.\n\n{ex.Message}",
                 "Save error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+    private void OpenProject_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFileDialog
+        {
+            Title = "Open CardForge project",
+            Filter = "CardForge project (*.cardforge)|*.cardforge"
+        };
+
+        if (dialog.ShowDialog() != true)
+            return;
+
+        try
+        {
+            using var archive = ZipFile.OpenRead(dialog.FileName);
+
+            var projectEntry = archive.GetEntry("project.json");
+            if (projectEntry is null)
+                throw new InvalidOperationException("project.json not found.");
+
+            ProjectSaveModel? project;
+            using (var stream = projectEntry.Open())
+            {
+                project = JsonSerializer.Deserialize<ProjectSaveModel>(stream);
+            }
+
+            if (project is null)
+                throw new InvalidOperationException("Could not read project.json.");
+
+            var imageEntry = archive.GetEntry(project.SourceImageFile);
+            if (imageEntry is null)
+                throw new InvalidOperationException("Source image not found.");
+
+            BitmapImage bitmap;
+            using (var imageStream = imageEntry.Open())
+            using (var memoryStream = new MemoryStream())
+            {
+                imageStream.CopyTo(memoryStream);
+                memoryStream.Position = 0;
+
+                bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.StreamSource = memoryStream;
+                bitmap.EndInit();
+                bitmap.Freeze();
+            }
+
+            _loadedBitmap = bitmap;
+            _loadedImagePath = null;
+
+            _layers.Clear();
+
+            foreach (var savedLayer in project.Layers)
+            {
+                var layer = new CardLayer(savedLayer.Name)
+                {
+                    IsVisible = savedLayer.IsVisible,
+                    Opacity = savedLayer.Opacity,
+                    LayerThickness = savedLayer.LayerThickness,
+                    ImageSource = bitmap,
+                    Mask = new LayerMask(savedLayer.MaskWidth, savedLayer.MaskHeight)
+                };
+
+                var maskEntry = archive.GetEntry(savedLayer.MaskFile);
+                if (maskEntry is not null && layer.Mask is not null)
+                {
+                    using var maskStream = maskEntry.Open();
+                    maskStream.ReadExactly(layer.Mask.Alpha);
+                }
+
+                if (layer.Mask is not null)
+                    layer.MaskImageSource = CreateMaskImageSource(layer.Mask);
+
+                _layers.Add(layer);
+            }
+
+            CanvasPlaceholder.Visibility = Visibility.Collapsed;
+            LayersListBox.SelectedIndex = _layers.Count > 0 ? 0 : -1;
+
+            ImageStatus.Content = $"Project loaded: {Path.GetFileName(dialog.FileName)}";
+            Title = $"CardForge 3D - {Path.GetFileName(dialog.FileName)}";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Could not open project.\n\n{ex.Message}",
+                "Open project error",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
