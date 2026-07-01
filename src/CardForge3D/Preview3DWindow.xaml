@@ -31,6 +31,34 @@
 
             <Button Content="Refresh"
         Click="Refresh_Click"/>
+
+            <TextBlock Text="X"
+           Foreground="{StaticResource TextColor}"
+           VerticalAlignment="Center"
+           Margin="16,0,8,0"/>
+
+            <Slider x:Name="XDirectionSlider"
+        Width="120"
+        Minimum="-1"
+        Maximum="1"
+        Value="1"
+        TickFrequency="1"
+        IsSnapToTickEnabled="True"
+        ValueChanged="DirectionSlider_ValueChanged"/>
+
+            <TextBlock Text="Y"
+           Foreground="{StaticResource TextColor}"
+           VerticalAlignment="Center"
+           Margin="16,0,8,0"/>
+
+            <Slider x:Name="YDirectionSlider"
+        Width="120"
+        Minimum="-1"
+        Maximum="1"
+        Value="-1"
+        TickFrequency="1"
+        IsSnapToTickEnabled="True"
+        ValueChanged="DirectionSlider_ValueChanged"/>
         </StackPanel>
 
         <Grid Background="{StaticResource PanelBgDark}" ClipToBounds="True">

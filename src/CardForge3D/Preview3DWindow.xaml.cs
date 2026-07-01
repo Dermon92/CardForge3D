@@ -57,8 +57,11 @@ public partial class Preview3DWindow : Window
 
             double offset = (_layers.Count - 1 - i) * depth;
 
-            Canvas.SetLeft(image, 170 + offset);
-            Canvas.SetTop(image, 160 - offset);
+            double xDirection = XDirectionSlider?.Value ?? 1;
+            double yDirection = YDirectionSlider?.Value ?? -1;
+
+            Canvas.SetLeft(image, 170 + offset * xDirection);
+            Canvas.SetTop(image, 160 + offset * yDirection);
 
             PreviewCanvas.Children.Add(image);
         }
@@ -67,5 +70,11 @@ public partial class Preview3DWindow : Window
     {
         RenderPreview();
     }
+    private void DirectionSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (PreviewCanvas is null)
+            return;
 
+        RenderPreview();
+    }
 }
