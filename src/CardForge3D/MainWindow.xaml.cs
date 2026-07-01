@@ -194,6 +194,7 @@ public partial class MainWindow : Window
         LayerOpacityValueText.Text = $"{LayerOpacitySlider.Value:0}%";
 
         Title = $"CardForge 3D - {selectedLayer.Name}";
+        ToleranceValueText.Text = $"{ToleranceSlider.Value:0}";
     }
     private void ToggleLayerVisibility_Click(object sender, RoutedEventArgs e)
     {
@@ -473,7 +474,7 @@ public partial class MainWindow : Window
         if (!TryMapPointToImagePixel(point, mask.Width, mask.Height, out int startX, out int startY))
             return;
 
-        int tolerance = 32; // później podepniemy pod slider Tolerance
+        int tolerance = (int)ToleranceSlider.Value; // później podepniemy pod slider Tolerance
 
         int width = mask.Width;
         int height = mask.Height;
@@ -503,12 +504,13 @@ public partial class MainWindow : Window
             byte g = pixels[index + 1];
             byte r = pixels[index + 2];
 
-            int diff =
-                Math.Abs(r - startR) +
-                Math.Abs(g - startG) +
-                Math.Abs(b - startB);
+            int dr = r - startR;
+            int dg = g - startG;
+            int db = b - startB;
 
-            if (diff > tolerance * 3)
+            double diff = Math.Sqrt(dr * dr + dg * dg + db * db);
+
+            if (diff > tolerance)
                 continue;
 
             mask.SetAlpha(x, y, 0);
@@ -517,6 +519,11 @@ public partial class MainWindow : Window
             TryAddWandNeighbor(x - 1, y);
             TryAddWandNeighbor(x, y + 1);
             TryAddWandNeighbor(x, y - 1);
+
+            TryAddWandNeighbor(x + 1, y + 1);
+            TryAddWandNeighbor(x - 1, y - 1);
+            TryAddWandNeighbor(x + 1, y - 1);
+            TryAddWandNeighbor(x - 1, y + 1);
         }
 
         _selectedLayer.MaskImageSource = CreateMaskImageSource(mask);
@@ -579,5 +586,12 @@ public partial class MainWindow : Window
         pixelY = Math.Clamp(pixelY, 0, imageHeight - 1);
 
         return true;
+    }
+    private void ToleranceSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (ToleranceValueText is null)
+            return;
+
+        ToleranceValueText.Text = $"{e.NewValue:0}";
     }
 }
