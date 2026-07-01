@@ -177,7 +177,10 @@
         MouseWheel="CanvasCardFrame_MouseWheel"
         MouseLeftButtonDown="CanvasCardFrame_MouseLeftButtonDown"
         MouseLeftButtonUp="CanvasCardFrame_MouseLeftButtonUp"
-        MouseMove="CanvasCardFrame_MouseMove">
+        MouseMove="CanvasCardFrame_MouseMove"
+        MouseRightButtonDown="CanvasCardFrame_MouseRightButtonDown"
+        MouseRightButtonUp="CanvasCardFrame_MouseRightButtonUp">
+
                         <Border.RenderTransform>
                             <TransformGroup>
                                 <ScaleTransform x:Name="CanvasScaleTransform" ScaleX="1" ScaleY="1"/>

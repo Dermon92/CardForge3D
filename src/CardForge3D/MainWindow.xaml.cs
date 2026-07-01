@@ -20,6 +20,7 @@ public partial class MainWindow : Window
     private CardLayer? _selectedLayer;
     private EditorTool _activeTool = EditorTool.Pan;
     private bool _isPainting;
+    private byte _paintAlpha = 0;
     public MainWindow()
     {
         InitializeComponent();
@@ -86,6 +87,7 @@ public partial class MainWindow : Window
     {
         if (_activeTool == EditorTool.Brush)
         {
+            _paintAlpha = 0;
             _isPainting = true;
             CanvasCardFrame.CaptureMouse();
             PaintMaskAt(e.GetPosition(CanvasCardFrame));
@@ -391,10 +393,30 @@ public partial class MainWindow : Window
                 if (targetX < 0 || targetY < 0 || targetX >= mask.Width || targetY >= mask.Height)
                     continue;
 
-                mask.SetAlpha(targetX, targetY, 0);
+                mask.SetAlpha(targetX, targetY, _paintAlpha);
             }
         }
 
         _selectedLayer.MaskImageSource = CreateMaskImageSource(mask);
+    }
+    private void CanvasCardFrame_MouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (_activeTool != EditorTool.Brush)
+            return;
+
+        _paintAlpha = 255;
+        _isPainting = true;
+        CanvasCardFrame.CaptureMouse();
+        PaintMaskAt(e.GetPosition(CanvasCardFrame));
+    }
+
+    private void CanvasCardFrame_MouseRightButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (_activeTool != EditorTool.Brush)
+            return;
+
+        _isPainting = false;
+        _paintAlpha = 0;
+        CanvasCardFrame.ReleaseMouseCapture();
     }
 }
