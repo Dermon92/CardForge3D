@@ -279,10 +279,20 @@
                             Maximum="255"
                             Value="32"
                             ValueChanged="ToleranceSlider_ValueChanged"/>
+                    
                     <TextBlock x:Name="ToleranceValueText"
                                Text="32"
                                Foreground="{StaticResource MutedTextColor}"
                                Margin="0,6,0,0"/>
+                    <TextBlock Text="Wand Mode"
+           Foreground="{StaticResource TextColor}"
+           Margin="0,16,0,6"/>
+
+                    <ComboBox x:Name="WandModeComboBox"
+          SelectedIndex="0">
+                        <ComboBoxItem Content="Contiguous"/>
+                        <ComboBoxItem Content="Global"/>
+                    </ComboBox>
 
                     <TextBlock Text="Layer Opacity"
                                Foreground="{StaticResource TextColor}"

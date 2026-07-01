@@ -476,6 +476,8 @@ public partial class MainWindow : Window
 
         int tolerance = (int)ToleranceSlider.Value; // później podepniemy pod slider Tolerance
 
+        bool isGlobalMode = WandModeComboBox.SelectedIndex == 1;
+
         int width = mask.Width;
         int height = mask.Height;
         int stride = width * 4;
@@ -489,58 +491,85 @@ public partial class MainWindow : Window
         byte startG = pixels[startIndex + 1];
         byte startR = pixels[startIndex + 2];
 
-        bool[] visited = new bool[width * height];
-        Queue<(int X, int Y)> queue = new();
-        queue.Enqueue((startX, startY));
-        visited[startY * width + startX] = true;
 
-        while (queue.Count > 0)
+
+        if (isGlobalMode)
         {
-            var (x, y) = queue.Dequeue();
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    int index = y * stride + x * 4;
 
-            int index = y * stride + x * 4;
+                    byte b = pixels[index + 0];
+                    byte g = pixels[index + 1];
+                    byte r = pixels[index + 2];
 
-            byte b = pixels[index + 0];
-            byte g = pixels[index + 1];
-            byte r = pixels[index + 2];
+                    int dr = r - startR;
+                    int dg = g - startG;
+                    int db = b - startB;
 
-            int dr = r - startR;
-            int dg = g - startG;
-            int db = b - startB;
+                    double diff = Math.Sqrt(dr * dr + dg * dg + db * db);
 
-            double diff = Math.Sqrt(dr * dr + dg * dg + db * db);
-
-            if (diff > tolerance)
-                continue;
-
-            mask.SetAlpha(x, y, 0);
-
-            TryAddWandNeighbor(x + 1, y);
-            TryAddWandNeighbor(x - 1, y);
-            TryAddWandNeighbor(x, y + 1);
-            TryAddWandNeighbor(x, y - 1);
-
-            TryAddWandNeighbor(x + 1, y + 1);
-            TryAddWandNeighbor(x - 1, y - 1);
-            TryAddWandNeighbor(x + 1, y - 1);
-            TryAddWandNeighbor(x - 1, y + 1);
+                    if (diff <= tolerance)
+                        mask.SetAlpha(x, y, 0);
+                }
+            }
         }
+        else
+        {
+            bool[] visited = new bool[width * height];
+            Queue<(int X, int Y)> queue = new();
+            queue.Enqueue((startX, startY));
+            visited[startY * width + startX] = true;
 
+            while (queue.Count > 0)
+            {
+                var (x, y) = queue.Dequeue();
+
+                int index = y * stride + x * 4;
+
+                byte b = pixels[index + 0];
+                byte g = pixels[index + 1];
+                byte r = pixels[index + 2];
+
+                int dr = r - startR;
+                int dg = g - startG;
+                int db = b - startB;
+
+                double diff = Math.Sqrt(dr * dr + dg * dg + db * db);
+
+                if (diff > tolerance)
+                    continue;
+
+                mask.SetAlpha(x, y, 0);
+
+                TryAddWandNeighbor(x + 1, y);
+                TryAddWandNeighbor(x - 1, y);
+                TryAddWandNeighbor(x, y + 1);
+                TryAddWandNeighbor(x, y - 1);
+
+                TryAddWandNeighbor(x + 1, y + 1);
+                TryAddWandNeighbor(x - 1, y - 1);
+                TryAddWandNeighbor(x + 1, y - 1);
+                TryAddWandNeighbor(x - 1, y + 1);
+            }
+
+            void TryAddWandNeighbor(int x, int y)
+            {
+                if (x < 0 || y < 0 || x >= width || y >= height)
+                    return;
+
+                int visitedIndex = y * width + x;
+
+                if (visited[visitedIndex])
+                    return;
+
+                visited[visitedIndex] = true;
+                queue.Enqueue((x, y));
+            }
+        }
         _selectedLayer.MaskImageSource = CreateMaskImageSource(mask);
-
-        void TryAddWandNeighbor(int x, int y)
-        {
-            if (x < 0 || y < 0 || x >= width || y >= height)
-                return;
-
-            int visitedIndex = y * width + x;
-
-            if (visited[visitedIndex])
-                return;
-
-            visited[visitedIndex] = true;
-            queue.Enqueue((x, y));
-        }
     }
     private bool TryMapPointToImagePixel(Point point, int imageWidth, int imageHeight, out int pixelX, out int pixelY)
     {
