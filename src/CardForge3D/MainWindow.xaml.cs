@@ -25,6 +25,7 @@ public partial class MainWindow : Window
     private bool _isPainting;
     private byte _paintAlpha = 0;
     private BitmapSource? _loadedBitmap;
+    private byte _wandAlpha = 0;
     public MainWindow()
     {
         InitializeComponent();
@@ -103,6 +104,7 @@ public partial class MainWindow : Window
         }
         if (_activeTool == EditorTool.MagicWand)
         {
+            _wandAlpha = 0;
             ApplyMagicWandAt(e.GetPosition(CanvasCardFrame));
             return;
         }
@@ -427,6 +429,12 @@ public partial class MainWindow : Window
     }
     private void CanvasCardFrame_MouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
+        if (_activeTool == EditorTool.MagicWand)
+        {
+            _wandAlpha = 255;
+            ApplyMagicWandAt(e.GetPosition(CanvasCardFrame));
+            return;
+        }
         if (_activeTool != EditorTool.Brush)
             return;
 
@@ -512,7 +520,7 @@ public partial class MainWindow : Window
                     double diff = Math.Sqrt(dr * dr + dg * dg + db * db);
 
                     if (diff <= tolerance)
-                        mask.SetAlpha(x, y, 0);
+                        mask.SetAlpha(x, y, _wandAlpha);
                 }
             }
         }
@@ -542,7 +550,7 @@ public partial class MainWindow : Window
                 if (diff > tolerance)
                     continue;
 
-                mask.SetAlpha(x, y, 0);
+                mask.SetAlpha(x, y, _wandAlpha);
 
                 TryAddWandNeighbor(x + 1, y);
                 TryAddWandNeighbor(x - 1, y);
