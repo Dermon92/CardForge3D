@@ -23,7 +23,7 @@
                 BorderThickness="0,0,0,1"
                 Padding="6,4">
             <StackPanel Orientation="Horizontal">
-                <Button Content="📂 Open"/>
+                <Button Content="📂 Open" Click="OpenImage_Click"/>
                 <Button Content="💾 Save"/>
 
                 <Border Width="1" Height="24" Background="{StaticResource BorderColor}" Margin="8,0"/>
@@ -48,7 +48,7 @@
             <Separator/>
             <StatusBarItem Content="Zoom 100%"/>
             <Separator/>
-            <StatusBarItem Content="No image loaded"/>
+            <StatusBarItem x:Name="ImageStatus" Content="No image loaded"/>
         </StatusBar>
 
         <Grid>
@@ -118,11 +118,18 @@
                             Background="#202020"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center">
-                        <TextBlock Text="Canvas"
-                                   Foreground="{StaticResource MutedTextColor}"
-                                   FontSize="36"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"/>
+                        <Grid>
+                            <TextBlock x:Name="CanvasPlaceholder"
+                                 Text="Open image to begin"
+                                 Foreground="{StaticResource MutedTextColor}"
+                                 FontSize="28"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center"/>
+
+                            <Image x:Name="CanvasImage"
+           Stretch="Uniform"
+           Visibility="Collapsed"/>
+                        </Grid>
                     </Border>
                 </Grid>
             </Border>
