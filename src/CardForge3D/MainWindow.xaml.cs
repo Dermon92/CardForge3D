@@ -145,6 +145,7 @@ public partial class MainWindow : Window
 
         SelectedLayerNameText.Text = $"Selected: {selectedLayer.Name}";
         LayerOpacitySlider.Value = selectedLayer.Opacity * 100;
+        LayerOpacityValueText.Text = $"{LayerOpacitySlider.Value:0}%";
 
         Title = $"CardForge 3D - {selectedLayer.Name}";
     }
@@ -193,6 +194,10 @@ public partial class MainWindow : Window
             return;
 
         layer.IsEditing = false;
+        if (Application.Current.MainWindow is MainWindow mainWindow)
+        {
+            mainWindow.RefreshSelectedLayerProperties();
+        }
     }
     private void LayerOpacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
@@ -200,6 +205,7 @@ public partial class MainWindow : Window
             return;
 
         _selectedLayer.Opacity = e.NewValue / 100.0;
+        LayerOpacityValueText.Text = $"{e.NewValue:0}%";
     }
 
     private void MoveLayerUp_Click(object sender, RoutedEventArgs e)
@@ -228,5 +234,13 @@ public partial class MainWindow : Window
 
         _layers.Move(index, index + 1);
         LayersListBox.SelectedItem = selectedLayer;
+    }
+    private void RefreshSelectedLayerProperties()
+    {
+        if (_selectedLayer is null)
+            return;
+
+        SelectedLayerNameText.Text = $"Selected: {_selectedLayer.Name}";
+        LayerOpacityValueText.Text = $"{LayerOpacitySlider.Value:0}%";
     }
 }
