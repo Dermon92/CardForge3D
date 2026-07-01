@@ -110,25 +110,36 @@
                             </DrawingBrush.Drawing>
                         </DrawingBrush>
                     </Grid.Background>
+                    <Border x:Name="CanvasCardFrame"
+        Width="420"
+        Height="585"
+        BorderBrush="#4A4A50"
+        BorderThickness="1"
+        Background="#202020"
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center"
+        MouseWheel="CanvasCardFrame_MouseWheel"
+        MouseLeftButtonDown="CanvasCardFrame_MouseLeftButtonDown"
+        MouseLeftButtonUp="CanvasCardFrame_MouseLeftButtonUp"
+        MouseMove="CanvasCardFrame_MouseMove">
+                        <Border.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform x:Name="CanvasScaleTransform" ScaleX="1" ScaleY="1"/>
+                                <TranslateTransform x:Name="CanvasTranslateTransform" X="0" Y="0"/>
+                            </TransformGroup>
+                        </Border.RenderTransform>
 
-                    <Border Width="420"
-                            Height="585"
-                            BorderBrush="#4A4A50"
-                            BorderThickness="1"
-                            Background="#202020"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center">
                         <Grid>
                             <TextBlock x:Name="CanvasPlaceholder"
-                                 Text="Open image to begin"
-                                 Foreground="{StaticResource MutedTextColor}"
-                                 FontSize="28"
-                                 HorizontalAlignment="Center"
-                                 VerticalAlignment="Center"/>
+                   Text="Open image to begin"
+                   Foreground="{StaticResource MutedTextColor}"
+                   FontSize="28"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"/>
 
                             <Image x:Name="CanvasImage"
-           Stretch="Uniform"
-           Visibility="Collapsed"/>
+               Stretch="Uniform"
+               Visibility="Collapsed"/>
                         </Grid>
                     </Border>
                 </Grid>

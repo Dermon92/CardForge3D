@@ -6,8 +6,13 @@ using System.Windows.Media.Imaging;
 
 namespace CardForge3D;
 
+
+
 public partial class MainWindow : Window
 {
+    private bool _isPanning;
+    private Point _lastPanPoint;
+    private double _zoom = 1.0;
     public MainWindow()
     {
         InitializeComponent();
@@ -48,5 +53,48 @@ public partial class MainWindow : Window
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
+    }
+
+
+    private void CanvasCardFrame_MouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+    {
+        const double zoomStep = 0.1;
+        const double minZoom = 0.25;
+        const double maxZoom = 5.0;
+
+        _zoom += e.Delta > 0 ? zoomStep : -zoomStep;
+        _zoom = Math.Clamp(_zoom, minZoom, maxZoom);
+
+        CanvasScaleTransform.ScaleX = _zoom;
+        CanvasScaleTransform.ScaleY = _zoom;
+    }
+
+    private void CanvasCardFrame_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        _isPanning = true;
+        _lastPanPoint = e.GetPosition(this);
+        CanvasCardFrame.CaptureMouse();
+        Cursor = System.Windows.Input.Cursors.Hand;
+    }
+
+    private void CanvasCardFrame_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        _isPanning = false;
+        CanvasCardFrame.ReleaseMouseCapture();
+        Cursor = System.Windows.Input.Cursors.Arrow;
+    }
+
+    private void CanvasCardFrame_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        if (!_isPanning)
+            return;
+
+        var currentPoint = e.GetPosition(this);
+        var delta = currentPoint - _lastPanPoint;
+
+        CanvasTranslateTransform.X += delta.X;
+        CanvasTranslateTransform.Y += delta.Y;
+
+        _lastPanPoint = currentPoint;
     }
 }
