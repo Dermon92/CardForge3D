@@ -244,4 +244,19 @@ public partial class MainWindow : Window
         SelectedLayerNameText.Text = $"Selected: {_selectedLayer.Name}";
         LayerOpacityValueText.Text = $"{LayerOpacitySlider.Value:0}%";
     }
+    private void HideLayerMask_Click(object sender, RoutedEventArgs e)
+    {
+        if (_selectedLayer?.Mask is null)
+            return;
+
+        Array.Fill(_selectedLayer.Mask.Alpha, (byte)0);
+    }
+
+    private void ShowLayerMask_Click(object sender, RoutedEventArgs e)
+    {
+        if (_selectedLayer?.Mask is null)
+            return;
+
+        Array.Fill(_selectedLayer.Mask.Alpha, (byte)255);
+    }
 }

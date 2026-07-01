@@ -264,6 +264,17 @@
                                Text="100%"
                                Foreground="{StaticResource MutedTextColor}"
                                Margin="0,6,0,0"/>
+                    <Separator Margin="0,16,0,16"/>
+
+                    <TextBlock Text="Mask Debug"
+                               Foreground="{StaticResource TextColor}"
+                               Margin="0,0,0,6"/>
+
+                    <Button Content="Hide Layer Mask"
+                            Click="HideLayerMask_Click"/>
+
+                    <Button Content="Show Layer Mask"
+                            Click="ShowLayerMask_Click"/>
                 </StackPanel>
             </Border>
 
