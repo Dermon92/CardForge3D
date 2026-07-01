@@ -16,6 +16,7 @@ public partial class MainWindow : Window
     private Point _lastPanPoint;
     private double _zoom = 1.0;
     private ObservableCollection<CardLayer> _layers = new();
+    private CardLayer? _selectedLayer;
     public MainWindow()
     {
         InitializeComponent();
@@ -134,10 +135,15 @@ public partial class MainWindow : Window
 
     private void LayersListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
     {
-        if (LayersListBox.SelectedItem is CardLayer selectedLayer)
-        {
-            Title = $"CardForge 3D - {selectedLayer.Name}";
-        }
+        if (LayersListBox.SelectedItem is not CardLayer selectedLayer)
+            return;
+
+        _selectedLayer = selectedLayer;
+
+        SelectedLayerNameText.Text = $"Selected: {selectedLayer.Name}";
+        LayerOpacitySlider.Value = selectedLayer.Opacity * 100;
+
+        Title = $"CardForge 3D - {selectedLayer.Name}";
     }
     private void ToggleLayerVisibility_Click(object sender, RoutedEventArgs e)
     {
@@ -184,5 +190,12 @@ public partial class MainWindow : Window
             return;
 
         layer.IsEditing = false;
+    }
+    private void LayerOpacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_selectedLayer is null)
+            return;
+
+        _selectedLayer.Opacity = e.NewValue / 100.0;
     }
 }

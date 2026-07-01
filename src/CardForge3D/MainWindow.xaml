@@ -202,7 +202,8 @@
                                FontWeight="SemiBold"
                                Margin="0,0,0,12"/>
 
-                    <TextBlock Text="No layer selected"
+                    <TextBlock x:Name="SelectedLayerNameText"
+                               Text="No layer selected"
                                Foreground="{StaticResource MutedTextColor}"
                                FontSize="14"/>
 
@@ -217,6 +218,16 @@
                                Foreground="{StaticResource TextColor}"
                                Margin="0,16,0,6"/>
                     <Slider Minimum="0" Maximum="255" Value="32"/>
+
+                    <TextBlock Text="Layer Opacity"
+                               Foreground="{StaticResource TextColor}"
+                               Margin="0,16,0,6"/>
+
+                    <Slider x:Name="LayerOpacitySlider"
+                                Minimum="0"
+                                Maximum="100"
+                                Value="100"
+                                ValueChanged="LayerOpacitySlider_ValueChanged"/>
                 </StackPanel>
             </Border>
 
