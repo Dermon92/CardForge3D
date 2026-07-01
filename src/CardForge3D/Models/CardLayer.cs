@@ -6,6 +6,8 @@ public class CardLayer
     public bool IsVisible { get; set; } = true;
     public double Opacity { get; set; } = 1.0;
 
+    public string VisibilityIcon => IsVisible ? "#" : "—";
+
     public CardLayer(string name)
     {
         Name = name;

@@ -78,8 +78,21 @@
                     </StackPanel>
 
                     <ListBox x:Name="LayersListBox"
-                         DisplayMemberPath="Name"
-                         SelectionChanged="LayersListBox_SelectionChanged"/>
+         SelectionChanged="LayersListBox_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel LastChildFill="True">
+                                    <Button Content="{Binding VisibilityIcon}"
+                        Width="34"
+                        Margin="0,0,8,0"
+                        Click="ToggleLayerVisibility_Click"/>
+                                    <TextBlock Text="{Binding Name}"
+                           Foreground="{StaticResource TextColor}"
+                           VerticalAlignment="Center"/>
+                                </DockPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </DockPanel>
             </Border>
 

@@ -139,4 +139,16 @@ public partial class MainWindow : Window
             Title = $"CardForge 3D - {selectedLayer.Name}";
         }
     }
+    private void ToggleLayerVisibility_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement element)
+            return;
+
+        if (element.DataContext is not CardLayer layer)
+            return;
+
+        layer.IsVisible = !layer.IsVisible;
+
+        LayersListBox.Items.Refresh();
+    }
 }
