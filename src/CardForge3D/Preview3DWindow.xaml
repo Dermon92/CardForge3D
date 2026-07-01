@@ -2,8 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="3D Preview"
-        Width="900"
-        Height="700"
+        Width="1200"
+        Height="900"
         WindowStartupLocation="CenterOwner"
         Background="{StaticResource WindowBg}">
 
@@ -19,17 +19,19 @@
             <Slider x:Name="DepthSlider"
                     Width="200"
                     Minimum="0"
-                    Maximum="12"
+                    Maximum="24"
                     Value="4"
                     ValueChanged="DepthSlider_ValueChanged"/>
+            <Button Content="Refresh" Click="Refresh_Click"/>
         </StackPanel>
 
-        <Grid Background="{StaticResource PanelBgDark}">
+        <Grid Background="{StaticResource PanelBgDark}" ClipToBounds="True">
             <Canvas x:Name="PreviewCanvas"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    Width="420"
-                    Height="585"/>
+                    Width="760"
+                    Height="900"
+                    ClipToBounds="True"/>
         </Grid>
     </DockPanel>
 </Window>

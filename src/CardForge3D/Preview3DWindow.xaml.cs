@@ -57,10 +57,14 @@ public partial class Preview3DWindow : Window
 
             double offset = (_layers.Count - 1 - i) * depth;
 
-            Canvas.SetLeft(image, offset);
-            Canvas.SetTop(image, -offset);
+            Canvas.SetLeft(image, 170 + offset);
+            Canvas.SetTop(image, 160 - offset);
 
             PreviewCanvas.Children.Add(image);
         }
+    }
+    private void Refresh_Click(object sender, RoutedEventArgs e)
+    {
+        RenderPreview();
     }
 }
