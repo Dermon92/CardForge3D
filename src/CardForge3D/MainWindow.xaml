@@ -31,7 +31,7 @@
                 <Border Width="1" Height="24" Background="{StaticResource BorderColor}" Margin="8,0"/>
 
                 <Button Content="↶ Undo" Click="Undo_Click"/>
-                <Button Content="↷ Redo"/>
+                <Button Content="↷ Redo" Click="Redo_Click"/>
 
                 <Border Width="1" Height="24" Background="{StaticResource BorderColor}" Margin="8,0"/>
 

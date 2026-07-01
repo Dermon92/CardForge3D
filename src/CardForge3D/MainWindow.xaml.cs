@@ -28,6 +28,8 @@ public partial class MainWindow : Window
     private BitmapSource? _loadedBitmap;
     private byte _wandAlpha = 0;
     private readonly Stack<(CardLayer Layer, byte[] Alpha)> _undoStack = new();
+    private readonly Stack<(CardLayer Layer, byte[] Alpha)> _redoStack = new();
+
     public MainWindow()
     {
         InitializeComponent();
@@ -657,6 +659,7 @@ public partial class MainWindow : Window
             return;
 
         _undoStack.Push((layer, (byte[])layer.Mask.Alpha.Clone()));
+        _redoStack.Clear();
     }
     private void Undo_Click(object sender, RoutedEventArgs e)
     {
@@ -666,16 +669,39 @@ public partial class MainWindow : Window
             return;
         }
 
-        var (layer, alphaSnapshot) = _undoStack.Pop();
+        var (layer, undoAlpha) = _undoStack.Pop();
 
         if (layer.Mask is null)
             return;
 
-        Array.Copy(alphaSnapshot, layer.Mask.Alpha, alphaSnapshot.Length);
+        _redoStack.Push((layer, (byte[])layer.Mask.Alpha.Clone()));
+
+        Array.Copy(undoAlpha, layer.Mask.Alpha, undoAlpha.Length);
         layer.MaskImageSource = CreateMaskImageSource(layer.Mask);
 
         LayersListBox.SelectedItem = layer;
         ImageStatus.Content = $"Undo: restored {layer.Name}";
+    }
+    private void Redo_Click(object sender, RoutedEventArgs e)
+    {
+        if (_redoStack.Count == 0)
+        {
+            ImageStatus.Content = "Nothing to redo";
+            return;
+        }
+
+        var (layer, redoAlpha) = _redoStack.Pop();
+
+        if (layer.Mask is null)
+            return;
+
+        _undoStack.Push((layer, (byte[])layer.Mask.Alpha.Clone()));
+
+        Array.Copy(redoAlpha, layer.Mask.Alpha, redoAlpha.Length);
+        layer.MaskImageSource = CreateMaskImageSource(layer.Mask);
+
+        LayersListBox.SelectedItem = layer;
+        ImageStatus.Content = $"Redo: restored {layer.Name}";
     }
     private void MainWindow_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
@@ -702,7 +728,7 @@ public partial class MainWindow : Window
 
         if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.Y)
         {
-            ImageStatus.Content = "Redo not implemented yet";
+            Redo_Click(sender, e);
             e.Handled = true;
             return;
         }
