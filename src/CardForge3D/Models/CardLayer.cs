@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Media;
 
 namespace CardForge3D.Models;
 
@@ -9,6 +10,17 @@ public class CardLayer : INotifyPropertyChanged
     private bool _isVisible = true;
     private double _opacity = 1.0;
     private bool _isEditing;
+    private ImageSource? _imageSource;
+
+    public ImageSource? ImageSource
+    {
+        get => _imageSource;
+        set
+        {
+            _imageSource = value;
+            OnPropertyChanged();
+        }
+    }
 
     public bool IsEditing
     {

@@ -43,8 +43,11 @@ public partial class MainWindow : Window
             bitmap.EndInit();
             bitmap.Freeze();
 
-            CanvasImage.Source = bitmap;
-            CanvasImage.Visibility = Visibility.Visible;
+            foreach (var layer in _layers)
+            {
+                layer.ImageSource = bitmap;
+            }
+
             CanvasPlaceholder.Visibility = Visibility.Collapsed;
 
             ImageStatus.Content = $"Loaded: {Path.GetFileName(dialog.FileName)}";

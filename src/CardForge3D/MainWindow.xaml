@@ -191,9 +191,33 @@
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"/>
 
-                            <Image x:Name="CanvasImage"
-               Stretch="Uniform"
-               Visibility="Collapsed"/>
+                            <ItemsControl x:Name="LayerRenderControl"
+              ItemsSource="{Binding ElementName=LayersListBox, Path=ItemsSource}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Grid/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Image Source="{Binding ImageSource}"
+                   Stretch="Uniform"
+                   Opacity="{Binding Opacity}">
+                                            <Image.Style>
+                                                <Style TargetType="Image">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsVisible}" Value="False">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Image.Style>
+                                        </Image>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </Grid>
                     </Border>
                 </Grid>
