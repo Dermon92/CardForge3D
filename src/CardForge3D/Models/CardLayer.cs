@@ -12,7 +12,17 @@ public class CardLayer : INotifyPropertyChanged
     private bool _isEditing;
     private ImageSource? _imageSource;
     private LayerMask? _mask;
+    private ImageSource? _maskImageSource;
 
+    public ImageSource? MaskImageSource
+    {
+        get => _maskImageSource;
+        set
+        {
+            _maskImageSource = value;
+            OnPropertyChanged();
+        }
+    }
     public LayerMask? Mask
     {
         get => _mask;

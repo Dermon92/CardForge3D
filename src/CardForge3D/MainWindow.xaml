@@ -202,8 +202,13 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Image Source="{Binding ImageSource}"
-                   Stretch="Uniform"
-                   Opacity="{Binding Opacity}">
+       Stretch="Uniform"
+       Opacity="{Binding Opacity}">
+                                            <Image.OpacityMask>
+                                                <ImageBrush ImageSource="{Binding MaskImageSource}"
+                    Stretch="Uniform"/>
+                                            </Image.OpacityMask>
+
                                             <Image.Style>
                                                 <Style TargetType="Image">
                                                     <Setter Property="Visibility" Value="Visible"/>

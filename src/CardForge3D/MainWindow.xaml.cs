@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Media.Imaging;
 using CardForge3D.Models;
 using System.Collections.ObjectModel;
+using System.Windows.Media;
 
 namespace CardForge3D;
 
@@ -47,6 +48,7 @@ public partial class MainWindow : Window
             {
                 layer.ImageSource = bitmap;
                 layer.Mask = new LayerMask(bitmap.PixelWidth, bitmap.PixelHeight);
+                layer.MaskImageSource = CreateMaskImageSource(layer.Mask);
             }
 
             CanvasPlaceholder.Visibility = Visibility.Collapsed;
@@ -250,6 +252,7 @@ public partial class MainWindow : Window
             return;
 
         Array.Fill(_selectedLayer.Mask.Alpha, (byte)0);
+        _selectedLayer.MaskImageSource = CreateMaskImageSource(_selectedLayer.Mask);
     }
 
     private void ShowLayerMask_Click(object sender, RoutedEventArgs e)
@@ -258,5 +261,37 @@ public partial class MainWindow : Window
             return;
 
         Array.Fill(_selectedLayer.Mask.Alpha, (byte)255);
+        _selectedLayer.MaskImageSource = CreateMaskImageSource(_selectedLayer.Mask);
+    }
+    private static ImageSource CreateMaskImageSource(LayerMask mask)
+    {
+        int width = mask.Width;
+        int height = mask.Height;
+        int stride = width * 4;
+        byte[] pixels = new byte[height * stride];
+
+        for (int i = 0; i < mask.Alpha.Length; i++)
+        {
+            int p = i * 4;
+            byte alpha = mask.Alpha[i];
+
+            pixels[p + 0] = 255;
+            pixels[p + 1] = 255;
+            pixels[p + 2] = 255;
+            pixels[p + 3] = alpha;
+        }
+
+        var bitmap = BitmapSource.Create(
+            width,
+            height,
+            96,
+            96,
+            PixelFormats.Bgra32,
+            null,
+            pixels,
+            stride);
+
+        bitmap.Freeze();
+        return bitmap;
     }
 }
