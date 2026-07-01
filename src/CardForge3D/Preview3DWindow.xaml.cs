@@ -7,6 +7,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using HelixToolkit.Wpf;
 using System.Linq;
+using Microsoft.Win32;
+using System.IO;
+using System.Windows.Media.Imaging;
 
 namespace CardForge3D;
 
@@ -178,5 +181,38 @@ public partial class Preview3DWindow : Window
             UpDirection = new Vector3D(0, 0, 1),
             FieldOfView = 45
         };
+    }
+    private void ExportPreviewPng_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new SaveFileDialog
+        {
+            Title = "Export 3D preview",
+            Filter = "PNG image (*.png)|*.png",
+            FileName = "cardforge_3d_preview.png"
+        };
+
+        if (dialog.ShowDialog() != true)
+            return;
+
+        int width = (int)Viewport.ActualWidth;
+        int height = (int)Viewport.ActualHeight;
+
+        if (width <= 0 || height <= 0)
+            return;
+
+        var renderBitmap = new RenderTargetBitmap(
+            width,
+            height,
+            96,
+            96,
+            PixelFormats.Pbgra32);
+
+        renderBitmap.Render(Viewport);
+
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+
+        using var stream = File.Create(dialog.FileName);
+        encoder.Save(stream);
     }
 }

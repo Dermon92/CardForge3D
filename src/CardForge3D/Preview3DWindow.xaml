@@ -41,6 +41,8 @@
                     Click="Refresh_Click"/>
             <Button Content="Reset View"
         Click="ResetView_Click"/>
+            <Button Content="Export PNG"
+        Click="ExportPreviewPng_Click"/>
         </StackPanel>
 
         <helix:HelixViewport3D x:Name="Viewport"
