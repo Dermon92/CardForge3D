@@ -34,11 +34,12 @@
                 <Border Width="1" Height="24" Background="{StaticResource BorderColor}" Margin="8,0"/>
 
                 <Button Content="🔍 Zoom"/>
-                <Button Content="✋ Pan"/>
+                <Button Content="✋ Pan" Click="PanTool_Click"/>
 
                 <Border Width="1" Height="24" Background="{StaticResource BorderColor}" Margin="8,0"/>
 
-                <Button Content="🖌 Brush"/>
+                <Button Content="🖌 Brush" Click="BrushTool_Click"/>
+
                 <Button Content="🧽 Eraser"/>
             </StackPanel>
         </Border>
@@ -145,7 +146,8 @@
             </Border>
 
             <Border Grid.Column="1"
-                    Background="{StaticResource PanelBgDark}">
+                    Background="{StaticResource PanelBgDark}"
+                    ClipToBounds="True">
                 <Grid>
                     <Grid.Background>
                         <DrawingBrush TileMode="Tile"
@@ -249,7 +251,10 @@
                     <TextBlock Text="Brush Size"
                                Foreground="{StaticResource TextColor}"
                                Margin="0,0,0,6"/>
-                    <Slider Minimum="1" Maximum="100" Value="20"/>
+                    <Slider x:Name="BrushSizeSlider"
+                                Minimum="1"
+                                Maximum="100"
+                                Value="20"/>
 
                     <TextBlock Text="Tolerance"
                                Foreground="{StaticResource TextColor}"

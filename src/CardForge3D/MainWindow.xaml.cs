@@ -18,6 +18,8 @@ public partial class MainWindow : Window
     private double _zoom = 1.0;
     private ObservableCollection<CardLayer> _layers = new();
     private CardLayer? _selectedLayer;
+    private EditorTool _activeTool = EditorTool.Pan;
+    private bool _isPainting;
     public MainWindow()
     {
         InitializeComponent();
@@ -82,6 +84,14 @@ public partial class MainWindow : Window
 
     private void CanvasCardFrame_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
+        if (_activeTool == EditorTool.Brush)
+        {
+            _isPainting = true;
+            CanvasCardFrame.CaptureMouse();
+            PaintMaskAt(e.GetPosition(CanvasCardFrame));
+            return;
+        }
+
         _isPanning = true;
         _lastPanPoint = e.GetPosition(this);
         CanvasCardFrame.CaptureMouse();
@@ -90,6 +100,13 @@ public partial class MainWindow : Window
 
     private void CanvasCardFrame_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
+        if (_activeTool == EditorTool.Brush)
+        {
+            _isPainting = false;
+            CanvasCardFrame.ReleaseMouseCapture();
+            return;
+        }
+
         _isPanning = false;
         CanvasCardFrame.ReleaseMouseCapture();
         Cursor = System.Windows.Input.Cursors.Arrow;
@@ -97,6 +114,13 @@ public partial class MainWindow : Window
 
     private void CanvasCardFrame_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
     {
+        if (_activeTool == EditorTool.Brush)
+        {
+            if (_isPainting)
+                PaintMaskAt(e.GetPosition(CanvasCardFrame));
+
+            return;
+        }
         if (!_isPanning)
             return;
 
@@ -293,5 +317,84 @@ public partial class MainWindow : Window
 
         bitmap.Freeze();
         return bitmap;
+    }
+    private enum EditorTool
+    {
+        Pan,
+        Brush
+    }
+    private void PanTool_Click(object sender, RoutedEventArgs e)
+    {
+        _activeTool = EditorTool.Pan;
+        ImageStatus.Content = "Tool: Pan";
+    }
+
+    private void BrushTool_Click(object sender, RoutedEventArgs e)
+    {
+        _activeTool = EditorTool.Brush;
+        ImageStatus.Content = "Tool: Brush";
+    }
+    private void PaintMaskAt(Point point)
+    {
+        if (_selectedLayer?.Mask is null)
+            return;
+
+        var mask = _selectedLayer.Mask;
+
+        double frameWidth = CanvasCardFrame.ActualWidth;
+        double frameHeight = CanvasCardFrame.ActualHeight;
+
+        double imageAspect = (double)mask.Width / mask.Height;
+        double frameAspect = frameWidth / frameHeight;
+
+        double drawWidth;
+        double drawHeight;
+        double offsetX;
+        double offsetY;
+
+        if (imageAspect > frameAspect)
+        {
+            drawWidth = frameWidth;
+            drawHeight = frameWidth / imageAspect;
+            offsetX = 0;
+            offsetY = (frameHeight - drawHeight) / 2;
+        }
+        else
+        {
+            drawHeight = frameHeight;
+            drawWidth = frameHeight * imageAspect;
+            offsetX = (frameWidth - drawWidth) / 2;
+            offsetY = 0;
+        }
+
+        double localX = point.X - offsetX;
+        double localY = point.Y - offsetY;
+
+        if (localX < 0 || localY < 0 || localX > drawWidth || localY > drawHeight)
+            return;
+
+        int pixelX = (int)(localX / drawWidth * mask.Width);
+        int pixelY = (int)(localY / drawHeight * mask.Height);
+
+        int radius = (int)(BrushSizeSlider.Value / 2);
+
+        for (int y = -radius; y <= radius; y++)
+        {
+            for (int x = -radius; x <= radius; x++)
+            {
+                if (x * x + y * y > radius * radius)
+                    continue;
+
+                int targetX = pixelX + x;
+                int targetY = pixelY + y;
+
+                if (targetX < 0 || targetY < 0 || targetX >= mask.Width || targetY >= mask.Height)
+                    continue;
+
+                mask.SetAlpha(targetX, targetY, 0);
+            }
+        }
+
+        _selectedLayer.MaskImageSource = CreateMaskImageSource(mask);
     }
 }
