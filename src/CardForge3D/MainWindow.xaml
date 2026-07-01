@@ -82,13 +82,53 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <DockPanel LastChildFill="True">
+
                                     <Button Content="{Binding VisibilityIcon}"
-                        Width="34"
-                        Margin="0,0,8,0"
-                        Click="ToggleLayerVisibility_Click"/>
-                                    <TextBlock Text="{Binding Name}"
-                           Foreground="{StaticResource TextColor}"
-                           VerticalAlignment="Center"/>
+                Width="34"
+                Margin="0,0,6,0"
+                Click="ToggleLayerVisibility_Click"/>
+
+                                    <Button Content="Rename"
+                Width="44"
+                Margin="0,0,8,0"
+                Click="EditLayerName_Click"/>
+
+                                    <Grid>
+                                        <TextBlock Text="{Binding Name}"
+                       Foreground="{StaticResource TextColor}"
+                       VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
+                                        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                     Foreground="{StaticResource TextColor}"
+                     Background="#333337"
+                     BorderBrush="{StaticResource BorderColor}"
+                     VerticalAlignment="Center"
+                     KeyDown="LayerNameTextBox_KeyDown"
+                     LostFocus="LayerNameTextBox_LostFocus">
+                                            <TextBox.Style>
+                                                <Style TargetType="TextBox">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBox.Style>
+                                        </TextBox>
+                                    </Grid>
+
                                 </DockPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>

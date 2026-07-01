@@ -149,6 +149,40 @@ public partial class MainWindow : Window
 
         layer.IsVisible = !layer.IsVisible;
 
-        LayersListBox.Items.Refresh();
+
+    }
+    private void EditLayerName_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement element)
+            return;
+
+        if (element.DataContext is not CardLayer layer)
+            return;
+
+        layer.IsEditing = true;
+    }
+
+    private void LayerNameTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key != System.Windows.Input.Key.Enter)
+            return;
+
+        FinishLayerNameEditing(sender);
+    }
+
+    private void LayerNameTextBox_LostFocus(object sender, RoutedEventArgs e)
+    {
+        FinishLayerNameEditing(sender);
+    }
+
+    private static void FinishLayerNameEditing(object sender)
+    {
+        if (sender is not FrameworkElement element)
+            return;
+
+        if (element.DataContext is not CardLayer layer)
+            return;
+
+        layer.IsEditing = false;
     }
 }
