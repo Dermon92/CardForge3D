@@ -5,7 +5,9 @@
         Height="900"
         Width="1600"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource WindowBg}">
+        Background="{StaticResource WindowBg}"
+        KeyDown="MainWindow_KeyDown">
+
 
     <DockPanel>
 
@@ -28,7 +30,7 @@
 
                 <Border Width="1" Height="24" Background="{StaticResource BorderColor}" Margin="8,0"/>
 
-                <Button Content="↶ Undo"/>
+                <Button Content="↶ Undo" Click="Undo_Click"/>
                 <Button Content="↷ Redo"/>
 
                 <Border Width="1" Height="24" Background="{StaticResource BorderColor}" Margin="8,0"/>

@@ -5,9 +5,10 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Controls;
 
 
 namespace CardForge3D;
@@ -26,6 +27,7 @@ public partial class MainWindow : Window
     private byte _paintAlpha = 0;
     private BitmapSource? _loadedBitmap;
     private byte _wandAlpha = 0;
+    private readonly Stack<(CardLayer Layer, byte[] Alpha)> _undoStack = new();
     public MainWindow()
     {
         InitializeComponent();
@@ -96,6 +98,8 @@ public partial class MainWindow : Window
     {
         if (_activeTool == EditorTool.Brush)
         {
+            if (_selectedLayer is not null)
+                SaveMaskUndo(_selectedLayer);
             _paintAlpha = 0;
             _isPainting = true;
             CanvasCardFrame.CaptureMouse();
@@ -104,6 +108,8 @@ public partial class MainWindow : Window
         }
         if (_activeTool == EditorTool.MagicWand)
         {
+            if (_selectedLayer is not null)
+                SaveMaskUndo(_selectedLayer);
             _wandAlpha = 0;
             ApplyMagicWandAt(e.GetPosition(CanvasCardFrame));
             return;
@@ -431,6 +437,8 @@ public partial class MainWindow : Window
     {
         if (_activeTool == EditorTool.MagicWand)
         {
+            if (_selectedLayer is not null)
+                SaveMaskUndo(_selectedLayer);
             _wandAlpha = 255;
             ApplyMagicWandAt(e.GetPosition(CanvasCardFrame));
             return;
@@ -642,5 +650,81 @@ public partial class MainWindow : Window
             return;
 
         ToleranceValueText.Text = $"{e.NewValue:0}";
+    }
+    private void SaveMaskUndo(CardLayer layer)
+    {
+        if (layer.Mask is null)
+            return;
+
+        _undoStack.Push((layer, (byte[])layer.Mask.Alpha.Clone()));
+    }
+    private void Undo_Click(object sender, RoutedEventArgs e)
+    {
+        if (_undoStack.Count == 0)
+        {
+            ImageStatus.Content = "Nothing to undo";
+            return;
+        }
+
+        var (layer, alphaSnapshot) = _undoStack.Pop();
+
+        if (layer.Mask is null)
+            return;
+
+        Array.Copy(alphaSnapshot, layer.Mask.Alpha, alphaSnapshot.Length);
+        layer.MaskImageSource = CreateMaskImageSource(layer.Mask);
+
+        LayersListBox.SelectedItem = layer;
+        ImageStatus.Content = $"Undo: restored {layer.Name}";
+    }
+    private void MainWindow_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.Z)
+        {
+            Undo_Click(sender, e);
+            e.Handled = true;
+            return;
+        }
+
+        if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.O)
+        {
+            OpenImage_Click(sender, e);
+            e.Handled = true;
+            return;
+        }
+
+        if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.S)
+        {
+            ImageStatus.Content = "Save project not implemented yet";
+            e.Handled = true;
+            return;
+        }
+
+        if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.Y)
+        {
+            ImageStatus.Content = "Redo not implemented yet";
+            e.Handled = true;
+            return;
+        }
+
+        if (Keyboard.Modifiers == ModifierKeys.None && e.Key == Key.B)
+        {
+            BrushTool_Click(sender, e);
+            e.Handled = true;
+            return;
+        }
+
+        if (Keyboard.Modifiers == ModifierKeys.None && e.Key == Key.W)
+        {
+            MagicWandTool_Click(sender, e);
+            e.Handled = true;
+            return;
+        }
+
+        if (Keyboard.Modifiers == ModifierKeys.None && e.Key == Key.H)
+        {
+            PanTool_Click(sender, e);
+            e.Handled = true;
+        }
     }
 }
