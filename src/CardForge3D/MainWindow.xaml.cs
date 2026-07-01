@@ -205,6 +205,8 @@ public partial class MainWindow : Window
 
         Title = $"CardForge 3D - {selectedLayer.Name}";
         ToleranceValueText.Text = $"{ToleranceSlider.Value:0}";
+        LayerThicknessSlider.Value = selectedLayer.LayerThickness;
+        LayerThicknessValueText.Text = $"{selectedLayer.LayerThickness:0.0}";
     }
     private void ToggleLayerVisibility_Click(object sender, RoutedEventArgs e)
     {
@@ -761,5 +763,18 @@ public partial class MainWindow : Window
         };
 
         previewWindow.Show();
+    }
+    private void LayerThicknessSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (LayerThicknessValueText is null)
+            return;
+
+        LayerThicknessValueText.Text = $"{e.NewValue:0.0}";
+
+        if (_selectedLayer is null)
+            return;
+
+        _selectedLayer.LayerThickness = e.NewValue;
+        ImageStatus.Content = $"Thickness: {_selectedLayer.LayerThickness:0.0}";
     }
 }

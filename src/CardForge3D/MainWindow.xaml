@@ -311,6 +311,20 @@
                                Foreground="{StaticResource MutedTextColor}"
                                Margin="0,6,0,0"/>
                     <Separator Margin="0,16,0,16"/>
+                    <TextBlock Text="Layer Thickness"
+           Foreground="{StaticResource TextColor}"
+           Margin="0,16,0,6"/>
+
+                    <Slider x:Name="LayerThicknessSlider"
+        Minimum="0"
+        Maximum="5"
+        Value="1"
+        ValueChanged="LayerThicknessSlider_ValueChanged"/>
+
+                    <TextBlock x:Name="LayerThicknessValueText"
+           Text="1.0"
+           Foreground="{StaticResource MutedTextColor}"
+           Margin="0,6,0,0"/>
 
                     <TextBlock Text="Mask Debug"
                                Foreground="{StaticResource TextColor}"

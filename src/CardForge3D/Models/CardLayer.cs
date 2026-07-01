@@ -13,51 +13,15 @@ public class CardLayer : INotifyPropertyChanged
     private ImageSource? _imageSource;
     private LayerMask? _mask;
     private ImageSource? _maskImageSource;
+    private double _layerThickness = 1.0;
 
-    public ImageSource? MaskImageSource
-    {
-        get => _maskImageSource;
-        set
-        {
-            _maskImageSource = value;
-            OnPropertyChanged();
-        }
-    }
-    public LayerMask? Mask
-    {
-        get => _mask;
-        set
-        {
-            _mask = value;
-            OnPropertyChanged();
-        }
-    }
-    public ImageSource? ImageSource
-    {
-        get => _imageSource;
-        set
-        {
-            _imageSource = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public bool IsEditing
-    {
-        get => _isEditing;
-        set
-        {
-            _isEditing = value;
-            OnPropertyChanged();
-        }
-    }
     public string Name
     {
         get => _name;
         set
         {
             _name = value;
-            OnPropertyChanged();
+            NotifyPropertyChanged();
         }
     }
 
@@ -67,8 +31,8 @@ public class CardLayer : INotifyPropertyChanged
         set
         {
             _isVisible = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(VisibilityIcon));
+            NotifyPropertyChanged();
+            NotifyPropertyChanged(nameof(VisibilityIcon));
         }
     }
 
@@ -78,11 +42,61 @@ public class CardLayer : INotifyPropertyChanged
         set
         {
             _opacity = value;
-            OnPropertyChanged();
+            NotifyPropertyChanged();
         }
     }
 
-    public string VisibilityIcon => IsVisible ? "#" : "—";
+    public bool IsEditing
+    {
+        get => _isEditing;
+        set
+        {
+            _isEditing = value;
+            NotifyPropertyChanged();
+        }
+    }
+
+    public ImageSource? ImageSource
+    {
+        get => _imageSource;
+        set
+        {
+            _imageSource = value;
+            NotifyPropertyChanged();
+        }
+    }
+
+    public LayerMask? Mask
+    {
+        get => _mask;
+        set
+        {
+            _mask = value;
+            NotifyPropertyChanged();
+        }
+    }
+
+    public ImageSource? MaskImageSource
+    {
+        get => _maskImageSource;
+        set
+        {
+            _maskImageSource = value;
+            NotifyPropertyChanged();
+        }
+    }
+
+    public double LayerThickness
+    {
+        get => _layerThickness;
+        set
+        {
+            _layerThickness = value;
+            NotifyPropertyChanged();
+        }
+    }
+
+    public string VisibilityIcon => IsVisible ? "#" : "-";
 
     public CardLayer(string name)
     {
@@ -91,7 +105,7 @@ public class CardLayer : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    private void NotifyPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

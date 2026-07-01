@@ -9,6 +9,7 @@ namespace CardForge3D;
 public partial class Preview3DWindow : Window
 {
     private readonly ObservableCollection<CardLayer> _layers;
+    private double _thickness = 1.0;
 
     public Preview3DWindow(ObservableCollection<CardLayer> layers)
     {
@@ -55,7 +56,12 @@ public partial class Preview3DWindow : Window
                 };
             }
 
-            double offset = (_layers.Count - 1 - i) * depth;
+            double offset = 0;
+
+            for (int t = _layers.Count - 1; t > i; t--)
+            {
+                offset += _layers[t].LayerThickness * depth;
+            }
 
             double xDirection = XDirectionSlider?.Value ?? 1;
             double yDirection = YDirectionSlider?.Value ?? -1;
@@ -77,4 +83,5 @@ public partial class Preview3DWindow : Window
 
         RenderPreview();
     }
+
 }
