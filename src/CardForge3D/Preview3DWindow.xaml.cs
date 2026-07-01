@@ -83,5 +83,15 @@ public partial class Preview3DWindow : Window
 
         RenderPreview();
     }
+    private void PreviewTransformSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (PreviewRotateTransform is null || PreviewSkewTransform is null || RotateValueText is null)
+            return;
+
+        PreviewRotateTransform.Angle = RotateSlider.Value;
+        RotateValueText.Text = $"{RotateSlider.Value:0}°";
+
+        PreviewSkewTransform.AngleX = TiltSlider.Value * 30;
+    }
 
 }

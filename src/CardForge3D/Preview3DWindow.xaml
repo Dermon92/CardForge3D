@@ -59,15 +59,56 @@
         TickFrequency="1"
         IsSnapToTickEnabled="True"
         ValueChanged="DirectionSlider_ValueChanged"/>
+
+            <TextBlock Text="Rotate"
+           Foreground="{StaticResource TextColor}"
+           VerticalAlignment="Center"
+           Margin="16,0,8,0"/>
+
+            <Slider x:Name="RotateSlider"
+        Width="160"
+        Minimum="-30"
+        Maximum="30"
+        Value="0"
+        ValueChanged="PreviewTransformSlider_ValueChanged"/>
+
+            <TextBlock x:Name="RotateValueText"
+           Text="0°"
+           Foreground="{StaticResource MutedTextColor}"
+           VerticalAlignment="Center"
+           Margin="8,0,16,0"/>
+
+            <TextBlock Text="Tilt"
+           Foreground="{StaticResource TextColor}"
+           VerticalAlignment="Center"
+           Margin="0,0,8,0"/>
+
+            <Slider x:Name="TiltSlider"
+        Width="160"
+        Minimum="-0.5"
+        Maximum="0.5"
+        Value="0"
+        ValueChanged="PreviewTransformSlider_ValueChanged"/>
         </StackPanel>
 
-        <Grid Background="{StaticResource PanelBgDark}" ClipToBounds="True">
+        <Grid x:Name="PreviewTransformRoot"
+      HorizontalAlignment="Center"
+      VerticalAlignment="Center"
+      Width="760"
+      Height="900"
+      ClipToBounds="True"
+      RenderTransformOrigin="0.5,0.5">
+
+            <Grid.RenderTransform>
+                <TransformGroup>
+                    <SkewTransform x:Name="PreviewSkewTransform" AngleX="0" AngleY="0"/>
+                    <RotateTransform x:Name="PreviewRotateTransform" Angle="0"/>
+                </TransformGroup>
+            </Grid.RenderTransform>
+
             <Canvas x:Name="PreviewCanvas"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Width="760"
-                    Height="900"
-                    ClipToBounds="True"/>
+            Width="760"
+            Height="900"/>
         </Grid>
     </DockPanel>
 </Window>
