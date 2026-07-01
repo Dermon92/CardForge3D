@@ -1,7 +1,8 @@
 ﻿<Window x:Class="CardForge3D.Preview3DWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="3D Preview"
+        xmlns:helix="http://helix-toolkit.org/wpf"
+        Title="Real 3D Preview"
         Width="1200"
         Height="900"
         WindowStartupLocation="CenterOwner"
@@ -11,104 +12,34 @@
         <StackPanel DockPanel.Dock="Top"
                     Orientation="Horizontal"
                     Margin="10">
-            <TextBlock Text="Depth"
-           Foreground="{StaticResource TextColor}"
-           VerticalAlignment="Center"
-           Margin="0,0,8,0"/>
 
-            <Slider x:Name="DepthSlider"
-        Width="220"
-        Minimum="0"
-        Maximum="24"
-        Value="6"
-        ValueChanged="DepthSlider_ValueChanged"/>
+            <TextBlock Text="Depth Scale"
+                       Foreground="{StaticResource TextColor}"
+                       VerticalAlignment="Center"
+                       Margin="0,0,8,0"/>
 
-            <TextBlock x:Name="DepthValueText"
-           Text="6"
-           Foreground="{StaticResource MutedTextColor}"
-           VerticalAlignment="Center"
-           Margin="8,0,16,0"/>
+            <Slider x:Name="DepthScaleSlider"
+                    Width="220"
+                    Minimum="0"
+                    Maximum="0.5"
+                    Value="0.08"
+                    ValueChanged="DepthScaleSlider_ValueChanged"/>
+
+            <TextBlock x:Name="DepthScaleValueText"
+                       Text="0.08"
+                       Foreground="{StaticResource MutedTextColor}"
+                       VerticalAlignment="Center"
+                       Margin="8,0,16,0"/>
 
             <Button Content="Refresh"
-        Click="Refresh_Click"/>
-
-            <TextBlock Text="X"
-           Foreground="{StaticResource TextColor}"
-           VerticalAlignment="Center"
-           Margin="16,0,8,0"/>
-
-            <Slider x:Name="XDirectionSlider"
-        Width="120"
-        Minimum="-1"
-        Maximum="1"
-        Value="1"
-        TickFrequency="1"
-        IsSnapToTickEnabled="True"
-        ValueChanged="DirectionSlider_ValueChanged"/>
-
-            <TextBlock Text="Y"
-           Foreground="{StaticResource TextColor}"
-           VerticalAlignment="Center"
-           Margin="16,0,8,0"/>
-
-            <Slider x:Name="YDirectionSlider"
-        Width="120"
-        Minimum="-1"
-        Maximum="1"
-        Value="-1"
-        TickFrequency="1"
-        IsSnapToTickEnabled="True"
-        ValueChanged="DirectionSlider_ValueChanged"/>
-
-            <TextBlock Text="Rotate"
-           Foreground="{StaticResource TextColor}"
-           VerticalAlignment="Center"
-           Margin="16,0,8,0"/>
-
-            <Slider x:Name="RotateSlider"
-        Width="160"
-        Minimum="-30"
-        Maximum="30"
-        Value="0"
-        ValueChanged="PreviewTransformSlider_ValueChanged"/>
-
-            <TextBlock x:Name="RotateValueText"
-           Text="0°"
-           Foreground="{StaticResource MutedTextColor}"
-           VerticalAlignment="Center"
-           Margin="8,0,16,0"/>
-
-            <TextBlock Text="Tilt"
-           Foreground="{StaticResource TextColor}"
-           VerticalAlignment="Center"
-           Margin="0,0,8,0"/>
-
-            <Slider x:Name="TiltSlider"
-        Width="160"
-        Minimum="-0.5"
-        Maximum="0.5"
-        Value="0"
-        ValueChanged="PreviewTransformSlider_ValueChanged"/>
+                    Click="Refresh_Click"/>
         </StackPanel>
 
-        <Grid x:Name="PreviewTransformRoot"
-      HorizontalAlignment="Center"
-      VerticalAlignment="Center"
-      Width="760"
-      Height="900"
-      ClipToBounds="True"
-      RenderTransformOrigin="0.5,0.5">
-
-            <Grid.RenderTransform>
-                <TransformGroup>
-                    <SkewTransform x:Name="PreviewSkewTransform" AngleX="0" AngleY="0"/>
-                    <RotateTransform x:Name="PreviewRotateTransform" Angle="0"/>
-                </TransformGroup>
-            </Grid.RenderTransform>
-
-            <Canvas x:Name="PreviewCanvas"
-            Width="760"
-            Height="900"/>
-        </Grid>
+        <helix:HelixViewport3D x:Name="Viewport"
+                               Background="#1B1B1C"
+                               ShowCoordinateSystem="True"
+                               ZoomExtentsWhenLoaded="True">
+            <helix:SunLight/>
+        </helix:HelixViewport3D>
     </DockPanel>
 </Window>
