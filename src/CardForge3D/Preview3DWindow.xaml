@@ -42,7 +42,7 @@
                                ShowCoordinateSystem="False"
                                ShowViewCube="False"
                                ZoomExtentsWhenLoaded="True">
-            <helix:SunLight/>
+ 
         </helix:HelixViewport3D>
     </DockPanel>
 </Window>

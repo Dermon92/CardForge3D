@@ -42,7 +42,11 @@ public partial class Preview3DWindow : Window
             return;
 
         Viewport.Children.Clear();
-        Viewport.Children.Add(new HelixToolkit.Wpf.SunLight());
+        var lights = new Model3DGroup();
+        lights.Children.Add(new AmbientLight(Color.FromRgb(80, 80, 80)));
+        lights.Children.Add(new DirectionalLight(Colors.White, new Vector3D(-0.5, -1, -1)));
+
+        Viewport.Children.Add(new ModelVisual3D { Content = lights });
 
         var group = new Model3DGroup();
 
