@@ -46,6 +46,7 @@ public partial class MainWindow : Window
             foreach (var layer in _layers)
             {
                 layer.ImageSource = bitmap;
+                layer.Mask = new LayerMask(bitmap.PixelWidth, bitmap.PixelHeight);
             }
 
             CanvasPlaceholder.Visibility = Visibility.Collapsed;

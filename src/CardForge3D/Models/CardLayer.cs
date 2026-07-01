@@ -11,7 +11,17 @@ public class CardLayer : INotifyPropertyChanged
     private double _opacity = 1.0;
     private bool _isEditing;
     private ImageSource? _imageSource;
+    private LayerMask? _mask;
 
+    public LayerMask? Mask
+    {
+        get => _mask;
+        set
+        {
+            _mask = value;
+            OnPropertyChanged();
+        }
+    }
     public ImageSource? ImageSource
     {
         get => _imageSource;
