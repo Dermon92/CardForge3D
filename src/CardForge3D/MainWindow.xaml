@@ -1,0 +1,176 @@
+﻿<Window x:Class="CardForge3D.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="CardForge 3D"
+        Height="900"
+        Width="1600"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource WindowBg}">
+
+    <DockPanel>
+
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="File"/>
+            <MenuItem Header="Edit"/>
+            <MenuItem Header="View"/>
+            <MenuItem Header="Export"/>
+            <MenuItem Header="Help"/>
+        </Menu>
+
+        <Border DockPanel.Dock="Top"
+        Background="{StaticResource HeaderBg}"
+        BorderBrush="{StaticResource BorderColor}"
+        BorderThickness="0,0,0,1"
+        Padding="6,4">
+
+            <StackPanel Orientation="Horizontal">
+
+                <Button Content="📂 Open"/>
+                <Button Content="💾 Save"/>
+
+                <Border Width="1" Height="24" Background="{StaticResource BorderColor}" Margin="8,0"/>
+
+                <Button Content="↶ Undo"/>
+                <Button Content="↷ Redo"/>
+
+                <Border Width="1" Height="24" Background="{StaticResource BorderColor}" Margin="8,0"/>
+
+                <Button Content="🔍 Zoom"/>
+                <Button Content="✋ Pan"/>
+
+                <Border Width="1" Height="24" Background="{StaticResource BorderColor}" Margin="8,0"/>
+
+                <Button Content="🖌 Brush"/>
+                <Button Content="🧽 Eraser"/>
+
+            </StackPanel>
+        </Border>
+        
+        
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem Content="Ready"/>
+            <Separator/>
+            <StatusBarItem Content="Zoom 100%"/>
+            <Separator/>
+            <StatusBarItem Content="No image loaded"/>
+        </StatusBar>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="260"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="260"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Background="{StaticResource PanelBg}"
+                    BorderBrush="{StaticResource BorderColor}"
+                    BorderThickness="0,0,1,0">
+
+                <DockPanel Margin="12">
+                    <TextBlock DockPanel.Dock="Top"
+                               Text="Layers"
+                               Foreground="{StaticResource TextColor}"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,12"/>
+
+                    <StackPanel DockPanel.Dock="Bottom"
+                                Orientation="Horizontal"
+                                Margin="0,12,0,0">
+                        <Button Content="+ Add"/>
+                        <Button Content="- Remove"/>
+                    </StackPanel>
+
+                    <ListBox>
+                        <ListBoxItem Content="Layer 8"/>
+                        <ListBoxItem Content="Layer 7"/>
+                        <ListBoxItem Content="Layer 6"/>
+                        <ListBoxItem Content="Layer 5"/>
+                        <ListBoxItem Content="Layer 4"/>
+                        <ListBoxItem Content="Layer 3"/>
+                        <ListBoxItem Content="Layer 2"/>
+                        <ListBoxItem Content="Layer 1"/>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+
+            <Border Grid.Column="1"
+                    Background="{StaticResource PanelBgDark}"
+                    BorderBrush="{StaticResource BorderColor}"
+                    BorderThickness="0">
+
+                <Grid>
+                    <Grid.Background>
+                        <DrawingBrush TileMode="Tile"
+                                      Viewport="0,0,32,32"
+                                      ViewportUnits="Absolute">
+                            <DrawingBrush.Drawing>
+                                <GeometryDrawing Brush="#1E1E1E">
+                                    <GeometryDrawing.Geometry>
+                                        <GeometryGroup>
+                                            <RectangleGeometry Rect="0,0,32,32"/>
+                                            <RectangleGeometry Rect="0,0,16,16"/>
+                                            <RectangleGeometry Rect="16,16,16,16"/>
+                                        </GeometryGroup>
+                                    </GeometryDrawing.Geometry>
+                                </GeometryDrawing>
+                            </DrawingBrush.Drawing>
+                        </DrawingBrush>
+                    </Grid.Background>
+
+                    <Border Width="420"
+                            Height="585"
+                            BorderBrush="#4A4A50"
+                            BorderThickness="1"
+                            Background="#202020"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                        <TextBlock Text="Canvas"
+                                   Foreground="{StaticResource MutedTextColor}"
+                                   FontSize="36"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="2"
+                    Background="{StaticResource PanelBg}"
+                    BorderBrush="{StaticResource BorderColor}"
+                    BorderThickness="1,0,0,0">
+
+                <StackPanel Margin="12">
+                    <TextBlock Text="Properties"
+                               Foreground="{StaticResource TextColor}"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,12"/>
+
+                    <TextBlock Text="No layer selected"
+                               Foreground="{StaticResource MutedTextColor}"
+                               FontSize="14"/>
+
+                    <Separator Margin="0,16,0,16"/>
+
+                    <TextBlock Text="Brush Size"
+                               Foreground="{StaticResource TextColor}"
+                               Margin="0,0,0,6"/>
+
+                    <Slider Minimum="1"
+                            Maximum="100"
+                            Value="20"/>
+
+                    <TextBlock Text="Tolerance"
+                               Foreground="{StaticResource TextColor}"
+                               Margin="0,16,0,6"/>
+
+                    <Slider Minimum="0"
+                            Maximum="255"
+                            Value="32"/>
+                </StackPanel>
+            </Border>
+
+        </Grid>
+    </DockPanel>
+</Window>
