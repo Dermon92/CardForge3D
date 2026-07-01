@@ -960,6 +960,9 @@ public partial class MainWindow : Window
 
         try
         {
+            string layersFolder = Path.Combine(dialog.FolderName, "layers");
+            Directory.CreateDirectory(layersFolder);
+
             int exported = 0;
 
             for (int i = 0; i < _layers.Count; i++)
@@ -972,15 +975,39 @@ public partial class MainWindow : Window
                 var output = CreateExportBitmap(source, layer.Mask);
 
                 string safeName = MakeSafeFileName(layer.Name);
+
                 string filePath = Path.Combine(
-                    dialog.FolderName,
+                    layersFolder,
                     $"{i + 1:00}_{safeName}.png");
 
                 SaveBitmapAsPng(output, filePath);
                 exported++;
             }
 
-            ImageStatus.Content = $"Exported {exported} layer PNG files";
+            var manifest = new
+            {
+                ExportedAt = DateTime.UtcNow,
+                LayerCount = exported,
+                Layers = _layers.Select((layer, index) => new
+                {
+                    Index = index + 1,
+                    layer.Name,
+                    layer.IsVisible,
+                    layer.Opacity,
+                    layer.LayerThickness
+                }).ToList()
+            };
+
+            string manifestJson = JsonSerializer.Serialize(manifest, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+
+            File.WriteAllText(
+                Path.Combine(dialog.FolderName, "manifest.json"),
+                manifestJson);
+
+            ImageStatus.Content = $"Exported {exported} layers with manifest";
         }
         catch (Exception ex)
         {
