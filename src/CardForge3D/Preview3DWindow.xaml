@@ -12,17 +12,25 @@
                     Orientation="Horizontal"
                     Margin="10">
             <TextBlock Text="Depth"
-                       Foreground="{StaticResource TextColor}"
-                       VerticalAlignment="Center"
-                       Margin="0,0,8,0"/>
+           Foreground="{StaticResource TextColor}"
+           VerticalAlignment="Center"
+           Margin="0,0,8,0"/>
 
             <Slider x:Name="DepthSlider"
-                    Width="200"
-                    Minimum="0"
-                    Maximum="24"
-                    Value="4"
-                    ValueChanged="DepthSlider_ValueChanged"/>
-            <Button Content="Refresh" Click="Refresh_Click"/>
+        Width="220"
+        Minimum="0"
+        Maximum="24"
+        Value="6"
+        ValueChanged="DepthSlider_ValueChanged"/>
+
+            <TextBlock x:Name="DepthValueText"
+           Text="6"
+           Foreground="{StaticResource MutedTextColor}"
+           VerticalAlignment="Center"
+           Margin="8,0,16,0"/>
+
+            <Button Content="Refresh"
+        Click="Refresh_Click"/>
         </StackPanel>
 
         <Grid Background="{StaticResource PanelBgDark}" ClipToBounds="True">

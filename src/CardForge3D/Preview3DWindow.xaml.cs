@@ -21,7 +21,7 @@ public partial class Preview3DWindow : Window
     {
         if (PreviewCanvas is null)
             return;
-
+        DepthValueText.Text = $"{e.NewValue:0}";
         RenderPreview();
     }
 
@@ -67,4 +67,5 @@ public partial class Preview3DWindow : Window
     {
         RenderPreview();
     }
+
 }
