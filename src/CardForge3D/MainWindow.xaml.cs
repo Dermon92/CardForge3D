@@ -9,6 +9,9 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.IO.Compression;
+using System.Text.Json;
+
 
 
 namespace CardForge3D;
@@ -29,6 +32,7 @@ public partial class MainWindow : Window
     private byte _wandAlpha = 0;
     private readonly Stack<(CardLayer Layer, byte[] Alpha)> _undoStack = new();
     private readonly Stack<(CardLayer Layer, byte[] Alpha)> _redoStack = new();
+    private string? _loadedImagePath;
 
     public MainWindow()
     {
@@ -57,6 +61,7 @@ public partial class MainWindow : Window
             bitmap.EndInit();
             bitmap.Freeze();
             _loadedBitmap = bitmap;
+            _loadedImagePath = dialog.FileName;
 
             foreach (var layer in _layers)
             {
@@ -776,5 +781,74 @@ public partial class MainWindow : Window
 
         _selectedLayer.LayerThickness = e.NewValue;
         ImageStatus.Content = $"Thickness: {_selectedLayer.LayerThickness:0.0}";
+    }
+    private void SaveProject_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new SaveFileDialog
+        {
+            Title = "Save CardForge project",
+            Filter = "CardForge project (*.cardforge)|*.cardforge",
+            FileName = "project.cardforge"
+        };
+
+        if (dialog.ShowDialog() != true)
+            return;
+
+        try
+        {
+            var project = new ProjectSaveModel();
+            project.SourceImageFile = "source/source_image.png";
+
+            using var archive = ZipFile.Open(dialog.FileName, ZipArchiveMode.Create);
+            if (!string.IsNullOrEmpty(_loadedImagePath) && File.Exists(_loadedImagePath))
+            {
+                archive.CreateEntryFromFile(_loadedImagePath, project.SourceImageFile);
+            }
+
+            for (int i = 0; i < _layers.Count; i++)
+            {
+                var layer = _layers[i];
+
+                if (layer.Mask is null)
+                    continue;
+
+                string maskFile = $"masks/layer_{i}.mask";
+
+                project.Layers.Add(new ProjectLayerSaveModel
+                {
+                    Name = layer.Name,
+                    IsVisible = layer.IsVisible,
+                    Opacity = layer.Opacity,
+                    LayerThickness = layer.LayerThickness,
+                    MaskWidth = layer.Mask.Width,
+                    MaskHeight = layer.Mask.Height,
+                    MaskFile = maskFile
+                });
+
+                var maskEntry = archive.CreateEntry(maskFile);
+                using var maskStream = maskEntry.Open();
+                maskStream.Write(layer.Mask.Alpha, 0, layer.Mask.Alpha.Length);
+            }
+
+            var json = JsonSerializer.Serialize(project, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+
+            var projectEntry = archive.CreateEntry("project.json");
+            using var projectStream = projectEntry.Open();
+            using var writer = new StreamWriter(projectStream);
+            writer.Write(json);
+
+            ImageStatus.Content = $"Project saved: {Path.GetFileName(dialog.FileName)}";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Could not save project.\n\n{ex.Message}",
+                "Save error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
     }
 }
