@@ -228,6 +228,16 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
+                            <Canvas IsHitTestVisible="False">
+                            <Ellipse x:Name="BrushPreview"
+                                 Width="20"
+                                 Height="20"
+                                 Stroke="White"
+                                 StrokeThickness="1"
+                                 Fill="Transparent"
+                                 IsHitTestVisible="False"
+                                 Visibility="Collapsed"/>
+                            </Canvas>
                         </Grid>
                     </Border>
                 </Grid>

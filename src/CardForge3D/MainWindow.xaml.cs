@@ -1,11 +1,14 @@
-﻿using Microsoft.Win32;
+﻿using CardForge3D.Models;
+using Microsoft.Win32;
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
-using System.Windows.Media.Imaging;
-using CardForge3D.Models;
-using System.Collections.ObjectModel;
+using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Controls;
+
 
 namespace CardForge3D;
 
@@ -118,8 +121,12 @@ public partial class MainWindow : Window
     {
         if (_activeTool == EditorTool.Brush)
         {
+            var point = e.GetPosition(CanvasCardFrame);
+            UpdateBrushPreviewSize();
+            UpdateBrushPreviewPosition(point);
+
             if (_isPainting)
-                PaintMaskAt(e.GetPosition(CanvasCardFrame));
+                PaintMaskAt(point);
 
             return;
         }
@@ -329,12 +336,15 @@ public partial class MainWindow : Window
     {
         _activeTool = EditorTool.Pan;
         ImageStatus.Content = "Tool: Pan";
+        BrushPreview.Visibility = Visibility.Collapsed;
     }
 
     private void BrushTool_Click(object sender, RoutedEventArgs e)
     {
         _activeTool = EditorTool.Brush;
         ImageStatus.Content = "Tool: Brush";
+        BrushPreview.Visibility = Visibility.Visible;
+        UpdateBrushPreviewSize();
     }
     private void PaintMaskAt(Point point)
     {
@@ -378,7 +388,11 @@ public partial class MainWindow : Window
         int pixelX = (int)(localX / drawWidth * mask.Width);
         int pixelY = (int)(localY / drawHeight * mask.Height);
 
-        int radius = (int)(BrushSizeSlider.Value / 2);
+        double scaleX = drawWidth / mask.Width;
+        double scaleY = drawHeight / mask.Height;
+        double averageScale = (scaleX + scaleY) / 2.0;
+
+        int radius = (int)((BrushSizeSlider.Value / averageScale) / 2);
 
         for (int y = -radius; y <= radius; y++)
         {
@@ -418,5 +432,18 @@ public partial class MainWindow : Window
         _isPainting = false;
         _paintAlpha = 0;
         CanvasCardFrame.ReleaseMouseCapture();
+    }
+    private void UpdateBrushPreviewSize()
+    {
+        double size = BrushSizeSlider.Value;
+
+        BrushPreview.Width = size;
+        BrushPreview.Height = size;
+    }
+
+    private void UpdateBrushPreviewPosition(Point point)
+    {
+        Canvas.SetLeft(BrushPreview, point.X - BrushPreview.Width / 2);
+        Canvas.SetTop(BrushPreview, point.Y - BrushPreview.Height / 2);
     }
 }
