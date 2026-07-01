@@ -6,6 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using HelixToolkit.Wpf;
+using System.Linq;
 
 namespace CardForge3D;
 
@@ -53,6 +54,14 @@ public partial class Preview3DWindow : Window
         double width = 6.3;
         double height = 8.8;
         double depthScale = DepthScaleSlider.Value;
+        double totalThickness = _layers
+    .Where(layer => layer.IsVisible)
+    .Sum(layer => layer.LayerThickness);
+
+        int visibleLayerCount = _layers.Count(layer => layer.IsVisible);
+
+        ThicknessSummaryText.Text =
+            $"Total thickness: {totalThickness:0.0} mm | Layers: {visibleLayerCount}";
 
         double currentZ = 0;
 
