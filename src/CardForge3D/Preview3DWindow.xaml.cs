@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
+using HelixToolkit.Wpf;
 
 namespace CardForge3D;
 
@@ -18,6 +19,7 @@ public partial class Preview3DWindow : Window
         _layers = layers;
 
         RenderPreview();
+        SetDefaultCamera();
     }
 
     private void Refresh_Click(object sender, RoutedEventArgs e)
@@ -151,6 +153,17 @@ public partial class Preview3DWindow : Window
     }
     private void ResetView_Click(object sender, RoutedEventArgs e)
     {
+        SetDefaultCamera();
         Viewport.ZoomExtents();
+    }
+    private void SetDefaultCamera()
+    {
+        Viewport.Camera = new PerspectiveCamera
+        {
+            Position = new Point3D(7, -10, 8),
+            LookDirection = new Vector3D(-7, 10, -8),
+            UpDirection = new Vector3D(0, 0, 1),
+            FieldOfView = 45
+        };
     }
 }

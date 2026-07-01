@@ -39,7 +39,8 @@
 
         <helix:HelixViewport3D x:Name="Viewport"
                                Background="#1B1B1C"
-                               ShowCoordinateSystem="True"
+                               ShowCoordinateSystem="False"
+                               ShowViewCube="False"
                                ZoomExtentsWhenLoaded="True">
             <helix:SunLight/>
         </helix:HelixViewport3D>
