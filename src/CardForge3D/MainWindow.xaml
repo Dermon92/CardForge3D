@@ -77,16 +77,8 @@
                         <Button Content="- Remove"/>
                     </StackPanel>
 
-                    <ListBox>
-                        <ListBoxItem Content="Layer 8"/>
-                        <ListBoxItem Content="Layer 7"/>
-                        <ListBoxItem Content="Layer 6"/>
-                        <ListBoxItem Content="Layer 5"/>
-                        <ListBoxItem Content="Layer 4"/>
-                        <ListBoxItem Content="Layer 3"/>
-                        <ListBoxItem Content="Layer 2"/>
-                        <ListBoxItem Content="Layer 1"/>
-                    </ListBox>
+                    <ListBox x:Name="LayersListBox"
+                         DisplayMemberPath="Name"/>
                 </DockPanel>
             </Border>
 

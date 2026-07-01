@@ -3,6 +3,8 @@ using System;
 using System.IO;
 using System.Windows;
 using System.Windows.Media.Imaging;
+using CardForge3D.Models;
+using System.Collections.ObjectModel;
 
 namespace CardForge3D;
 
@@ -13,9 +15,11 @@ public partial class MainWindow : Window
     private bool _isPanning;
     private Point _lastPanPoint;
     private double _zoom = 1.0;
+    private ObservableCollection<CardLayer> _layers = new();
     public MainWindow()
     {
         InitializeComponent();
+        InitializeLayers();
     }
 
     private void OpenImage_Click(object sender, RoutedEventArgs e)
@@ -96,5 +100,15 @@ public partial class MainWindow : Window
         CanvasTranslateTransform.Y += delta.Y;
 
         _lastPanPoint = currentPoint;
+    }
+
+    private void InitializeLayers()
+    {
+        for (int i = 8; i >= 1; i--)
+        {
+            _layers.Add(new CardLayer($"Layer {i}"));
+        }
+
+        LayersListBox.ItemsSource = _layers;
     }
 }
