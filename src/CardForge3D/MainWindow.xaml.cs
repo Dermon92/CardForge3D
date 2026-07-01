@@ -13,6 +13,7 @@ using System.Text.Json;
 
 
 
+
 namespace CardForge3D;
 
 
@@ -940,5 +941,104 @@ public partial class MainWindow : Window
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
+    }
+    private void ExportLayers_Click(object sender, RoutedEventArgs e)
+    {
+        if (_layers.Count == 0 || _loadedBitmap is null)
+        {
+            ImageStatus.Content = "Nothing to export";
+            return;
+        }
+
+        var dialog = new Microsoft.Win32.OpenFolderDialog
+        {
+            Title = "Choose export folder"
+        };
+
+        if (dialog.ShowDialog() != true)
+            return;
+
+        try
+        {
+            int exported = 0;
+
+            for (int i = 0; i < _layers.Count; i++)
+            {
+                var layer = _layers[i];
+
+                if (layer.ImageSource is not BitmapSource source)
+                    continue;
+
+                var output = CreateExportBitmap(source, layer.Mask);
+
+                string safeName = MakeSafeFileName(layer.Name);
+                string filePath = Path.Combine(
+                    dialog.FolderName,
+                    $"{i + 1:00}_{safeName}.png");
+
+                SaveBitmapAsPng(output, filePath);
+                exported++;
+            }
+
+            ImageStatus.Content = $"Exported {exported} layer PNG files";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Could not export layers.\n\n{ex.Message}",
+                "Export error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+    private static BitmapSource CreateExportBitmap(BitmapSource source, LayerMask? mask)
+    {
+        int width = source.PixelWidth;
+        int height = source.PixelHeight;
+        int stride = width * 4;
+
+        var converted = new FormatConvertedBitmap(source, PixelFormats.Bgra32, null, 0);
+        byte[] pixels = new byte[height * stride];
+        converted.CopyPixels(pixels, stride, 0);
+
+        if (mask is not null && mask.Width == width && mask.Height == height)
+        {
+            for (int i = 0; i < mask.Alpha.Length; i++)
+            {
+                pixels[i * 4 + 3] = mask.Alpha[i];
+            }
+        }
+
+        var bitmap = BitmapSource.Create(
+            width,
+            height,
+            96,
+            96,
+            PixelFormats.Bgra32,
+            null,
+            pixels,
+            stride);
+
+        bitmap.Freeze();
+        return bitmap;
+    }
+
+    private static void SaveBitmapAsPng(BitmapSource bitmap, string filePath)
+    {
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(bitmap));
+
+        using var stream = File.Create(filePath);
+        encoder.Save(stream);
+    }
+
+    private static string MakeSafeFileName(string fileName)
+    {
+        foreach (char invalidChar in Path.GetInvalidFileNameChars())
+        {
+            fileName = fileName.Replace(invalidChar, '_');
+        }
+
+        return fileName;
     }
 }
