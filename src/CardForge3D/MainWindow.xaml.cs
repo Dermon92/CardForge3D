@@ -753,4 +753,13 @@ public partial class MainWindow : Window
             e.Handled = true;
         }
     }
+    private void Preview3D_Click(object sender, RoutedEventArgs e)
+    {
+        var previewWindow = new Preview3DWindow(_layers)
+        {
+            Owner = this
+        };
+
+        previewWindow.Show();
+    }
 }

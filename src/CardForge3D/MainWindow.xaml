@@ -45,6 +45,7 @@
                 <Button Content="🧽 Eraser"/>
                 
                 <Button Content="Magic Wand" Click="MagicWandTool_Click"/>
+                <Button Content="3D Preview" Click="Preview3D_Click"/>
             </StackPanel>
         </Border>
 
