@@ -13,7 +13,7 @@ public class CardLayer : INotifyPropertyChanged
     private ImageSource? _imageSource;
     private LayerMask? _mask;
     private ImageSource? _maskImageSource;
-    private double _layerThickness = 1.0;
+    private double _layerThickness = 0.3;
 
     public string Name
     {

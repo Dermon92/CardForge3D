@@ -13,7 +13,7 @@
                     Orientation="Horizontal"
                     Margin="10">
 
-            <TextBlock Text="Depth Scale"
+            <TextBlock Text="Visual Depth Scale"
                        Foreground="{StaticResource TextColor}"
                        VerticalAlignment="Center"
                        Margin="0,0,8,0"/>
