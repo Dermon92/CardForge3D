@@ -41,6 +41,8 @@
                 <Button Content="🖌 Brush" Click="BrushTool_Click"/>
 
                 <Button Content="🧽 Eraser"/>
+                
+                <Button Content="Magic Wand" Click="MagicWandTool_Click"/>
             </StackPanel>
         </Border>
 

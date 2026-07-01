@@ -24,6 +24,7 @@ public partial class MainWindow : Window
     private EditorTool _activeTool = EditorTool.Pan;
     private bool _isPainting;
     private byte _paintAlpha = 0;
+    private BitmapSource? _loadedBitmap;
     public MainWindow()
     {
         InitializeComponent();
@@ -32,6 +33,7 @@ public partial class MainWindow : Window
 
     private void OpenImage_Click(object sender, RoutedEventArgs e)
     {
+
         var dialog = new OpenFileDialog
         {
             Title = "Open card image",
@@ -49,6 +51,7 @@ public partial class MainWindow : Window
             bitmap.UriSource = new Uri(dialog.FileName);
             bitmap.EndInit();
             bitmap.Freeze();
+            _loadedBitmap = bitmap;
 
             foreach (var layer in _layers)
             {
@@ -62,6 +65,8 @@ public partial class MainWindow : Window
             ImageStatus.Content = $"Loaded: {Path.GetFileName(dialog.FileName)}";
             Title = $"CardForge 3D - {Path.GetFileName(dialog.FileName)}";
         }
+
+
         catch (Exception ex)
         {
             MessageBox.Show(
@@ -94,6 +99,11 @@ public partial class MainWindow : Window
             _isPainting = true;
             CanvasCardFrame.CaptureMouse();
             PaintMaskAt(e.GetPosition(CanvasCardFrame));
+            return;
+        }
+        if (_activeTool == EditorTool.MagicWand)
+        {
+            ApplyMagicWandAt(e.GetPosition(CanvasCardFrame));
             return;
         }
 
@@ -330,7 +340,8 @@ public partial class MainWindow : Window
     private enum EditorTool
     {
         Pan,
-        Brush
+        Brush,
+        MagicWand
     }
     private void PanTool_Click(object sender, RoutedEventArgs e)
     {
@@ -445,5 +456,128 @@ public partial class MainWindow : Window
     {
         Canvas.SetLeft(BrushPreview, point.X - BrushPreview.Width / 2);
         Canvas.SetTop(BrushPreview, point.Y - BrushPreview.Height / 2);
+    }
+    private void MagicWandTool_Click(object sender, RoutedEventArgs e)
+    {
+        _activeTool = EditorTool.MagicWand;
+        ImageStatus.Content = "Tool: Magic Wand";
+        BrushPreview.Visibility = Visibility.Collapsed;
+    }
+    private void ApplyMagicWandAt(Point point)
+    {
+        if (_selectedLayer?.Mask is null || _loadedBitmap is null)
+            return;
+
+        var mask = _selectedLayer.Mask;
+
+        if (!TryMapPointToImagePixel(point, mask.Width, mask.Height, out int startX, out int startY))
+            return;
+
+        int tolerance = 32; // później podepniemy pod slider Tolerance
+
+        int width = mask.Width;
+        int height = mask.Height;
+        int stride = width * 4;
+        byte[] pixels = new byte[height * stride];
+
+        _loadedBitmap.CopyPixels(pixels, stride, 0);
+
+        int startIndex = startY * stride + startX * 4;
+
+        byte startB = pixels[startIndex + 0];
+        byte startG = pixels[startIndex + 1];
+        byte startR = pixels[startIndex + 2];
+
+        bool[] visited = new bool[width * height];
+        Queue<(int X, int Y)> queue = new();
+        queue.Enqueue((startX, startY));
+        visited[startY * width + startX] = true;
+
+        while (queue.Count > 0)
+        {
+            var (x, y) = queue.Dequeue();
+
+            int index = y * stride + x * 4;
+
+            byte b = pixels[index + 0];
+            byte g = pixels[index + 1];
+            byte r = pixels[index + 2];
+
+            int diff =
+                Math.Abs(r - startR) +
+                Math.Abs(g - startG) +
+                Math.Abs(b - startB);
+
+            if (diff > tolerance * 3)
+                continue;
+
+            mask.SetAlpha(x, y, 0);
+
+            TryAddWandNeighbor(x + 1, y);
+            TryAddWandNeighbor(x - 1, y);
+            TryAddWandNeighbor(x, y + 1);
+            TryAddWandNeighbor(x, y - 1);
+        }
+
+        _selectedLayer.MaskImageSource = CreateMaskImageSource(mask);
+
+        void TryAddWandNeighbor(int x, int y)
+        {
+            if (x < 0 || y < 0 || x >= width || y >= height)
+                return;
+
+            int visitedIndex = y * width + x;
+
+            if (visited[visitedIndex])
+                return;
+
+            visited[visitedIndex] = true;
+            queue.Enqueue((x, y));
+        }
+    }
+    private bool TryMapPointToImagePixel(Point point, int imageWidth, int imageHeight, out int pixelX, out int pixelY)
+    {
+        pixelX = 0;
+        pixelY = 0;
+
+        double frameWidth = CanvasCardFrame.ActualWidth;
+        double frameHeight = CanvasCardFrame.ActualHeight;
+
+        double imageAspect = (double)imageWidth / imageHeight;
+        double frameAspect = frameWidth / frameHeight;
+
+        double drawWidth;
+        double drawHeight;
+        double offsetX;
+        double offsetY;
+
+        if (imageAspect > frameAspect)
+        {
+            drawWidth = frameWidth;
+            drawHeight = frameWidth / imageAspect;
+            offsetX = 0;
+            offsetY = (frameHeight - drawHeight) / 2;
+        }
+        else
+        {
+            drawHeight = frameHeight;
+            drawWidth = frameHeight * imageAspect;
+            offsetX = (frameWidth - drawWidth) / 2;
+            offsetY = 0;
+        }
+
+        double localX = point.X - offsetX;
+        double localY = point.Y - offsetY;
+
+        if (localX < 0 || localY < 0 || localX > drawWidth || localY > drawHeight)
+            return false;
+
+        pixelX = (int)(localX / drawWidth * imageWidth);
+        pixelY = (int)(localY / drawHeight * imageHeight);
+
+        pixelX = Math.Clamp(pixelX, 0, imageWidth - 1);
+        pixelY = Math.Clamp(pixelY, 0, imageHeight - 1);
+
+        return true;
     }
 }
