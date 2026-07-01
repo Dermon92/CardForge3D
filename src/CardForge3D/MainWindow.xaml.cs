@@ -111,4 +111,32 @@ public partial class MainWindow : Window
 
         LayersListBox.ItemsSource = _layers;
     }
+    private void AddLayer_Click(object sender, RoutedEventArgs e)
+    {
+        int layerNumber = _layers.Count + 1;
+
+        var newLayer = new CardLayer($"Layer {layerNumber}");
+
+        _layers.Insert(0, newLayer);
+        LayersListBox.SelectedItem = newLayer;
+    }
+
+    private void RemoveLayer_Click(object sender, RoutedEventArgs e)
+    {
+        if (LayersListBox.SelectedItem is not CardLayer selectedLayer)
+            return;
+
+        _layers.Remove(selectedLayer);
+
+        if (_layers.Count > 0)
+            LayersListBox.SelectedIndex = 0;
+    }
+
+    private void LayersListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        if (LayersListBox.SelectedItem is CardLayer selectedLayer)
+        {
+            Title = $"CardForge 3D - {selectedLayer.Name}";
+        }
+    }
 }

@@ -73,12 +73,13 @@
                     <StackPanel DockPanel.Dock="Bottom"
                                 Orientation="Horizontal"
                                 Margin="0,12,0,0">
-                        <Button Content="+ Add"/>
-                        <Button Content="- Remove"/>
+                        <Button Content="+ Add" Click="AddLayer_Click"/>
+                        <Button Content="- Remove" Click="RemoveLayer_Click"/>
                     </StackPanel>
 
                     <ListBox x:Name="LayersListBox"
-                         DisplayMemberPath="Name"/>
+                         DisplayMemberPath="Name"
+                         SelectionChanged="LayersListBox_SelectionChanged"/>
                 </DockPanel>
             </Border>
 
