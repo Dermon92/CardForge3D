@@ -198,4 +198,32 @@ public partial class MainWindow : Window
 
         _selectedLayer.Opacity = e.NewValue / 100.0;
     }
+
+    private void MoveLayerUp_Click(object sender, RoutedEventArgs e)
+    {
+        if (LayersListBox.SelectedItem is not CardLayer selectedLayer)
+            return;
+
+        int index = _layers.IndexOf(selectedLayer);
+
+        if (index <= 0)
+            return;
+
+        _layers.Move(index, index - 1);
+        LayersListBox.SelectedItem = selectedLayer;
+    }
+
+    private void MoveLayerDown_Click(object sender, RoutedEventArgs e)
+    {
+        if (LayersListBox.SelectedItem is not CardLayer selectedLayer)
+            return;
+
+        int index = _layers.IndexOf(selectedLayer);
+
+        if (index < 0 || index >= _layers.Count - 1)
+            return;
+
+        _layers.Move(index, index + 1);
+        LayersListBox.SelectedItem = selectedLayer;
+    }
 }
