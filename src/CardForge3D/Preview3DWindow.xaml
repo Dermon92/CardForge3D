@@ -33,6 +33,8 @@
 
             <Button Content="Refresh"
                     Click="Refresh_Click"/>
+            <Button Content="Reset View"
+        Click="ResetView_Click"/>
         </StackPanel>
 
         <helix:HelixViewport3D x:Name="Viewport"

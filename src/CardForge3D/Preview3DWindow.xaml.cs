@@ -149,4 +149,8 @@ public partial class Preview3DWindow : Window
         bitmap.Freeze();
         return bitmap;
     }
+    private void ResetView_Click(object sender, RoutedEventArgs e)
+    {
+        Viewport.ZoomExtents();
+    }
 }
