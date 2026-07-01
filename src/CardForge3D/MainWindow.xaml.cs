@@ -478,6 +478,7 @@ public partial class MainWindow : Window
             return;
 
         var mask = _selectedLayer.Mask;
+        int changedPixels = 0;
 
         if (!TryMapPointToImagePixel(point, mask.Width, mask.Height, out int startX, out int startY))
             return;
@@ -520,7 +521,13 @@ public partial class MainWindow : Window
                     double diff = Math.Sqrt(dr * dr + dg * dg + db * db);
 
                     if (diff <= tolerance)
-                        mask.SetAlpha(x, y, _wandAlpha);
+                    {
+                        if (mask.GetAlpha(x, y) != _wandAlpha)
+                        {
+                            mask.SetAlpha(x, y, _wandAlpha);
+                            changedPixels++;
+                        }
+                    }
                 }
             }
         }
@@ -550,7 +557,11 @@ public partial class MainWindow : Window
                 if (diff > tolerance)
                     continue;
 
-                mask.SetAlpha(x, y, _wandAlpha);
+                if (mask.GetAlpha(x, y) != _wandAlpha)
+                {
+                    mask.SetAlpha(x, y, _wandAlpha);
+                    changedPixels++;
+                }
 
                 TryAddWandNeighbor(x + 1, y);
                 TryAddWandNeighbor(x - 1, y);
@@ -578,6 +589,7 @@ public partial class MainWindow : Window
             }
         }
         _selectedLayer.MaskImageSource = CreateMaskImageSource(mask);
+        ImageStatus.Content = $"Magic Wand changed {changedPixels:N0} pixels";
     }
     private bool TryMapPointToImagePixel(Point point, int imageWidth, int imageHeight, out int pixelX, out int pixelY)
     {
