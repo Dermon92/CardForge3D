@@ -33,11 +33,17 @@ public partial class MainWindow : Window
     private readonly Stack<(CardLayer Layer, byte[] Alpha)> _undoStack = new();
     private readonly Stack<(CardLayer Layer, byte[] Alpha)> _redoStack = new();
     private string? _loadedImagePath;
+    private readonly string _autosavePath = Path.Combine(
+    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+    "CardForge3D",
+    "autosave.cardforge");
+    private bool _hasRecoveredAutosave;
 
     public MainWindow()
     {
         InitializeComponent();
         InitializeLayers();
+        TryRecoverAutosave();
     }
 
     private void OpenImage_Click(object sender, RoutedEventArgs e)
@@ -134,6 +140,7 @@ public partial class MainWindow : Window
         {
             _isPainting = false;
             CanvasCardFrame.ReleaseMouseCapture();
+            AutoSaveProject();
             return;
         }
 
@@ -441,6 +448,7 @@ public partial class MainWindow : Window
         }
 
         _selectedLayer.MaskImageSource = CreateMaskImageSource(mask);
+
     }
     private void CanvasCardFrame_MouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
@@ -469,6 +477,8 @@ public partial class MainWindow : Window
         _isPainting = false;
         _paintAlpha = 0;
         CanvasCardFrame.ReleaseMouseCapture();
+        AutoSaveProject();
+        return;
     }
     private void UpdateBrushPreviewSize()
     {
@@ -606,6 +616,7 @@ public partial class MainWindow : Window
             }
         }
         _selectedLayer.MaskImageSource = CreateMaskImageSource(mask);
+        AutoSaveProject();
         ImageStatus.Content = $"Magic Wand changed {changedPixels:N0} pixels";
     }
     private bool TryMapPointToImagePixel(Point point, int imageWidth, int imageHeight, out int pixelX, out int pixelY)
@@ -796,50 +807,7 @@ public partial class MainWindow : Window
 
         try
         {
-            var project = new ProjectSaveModel();
-            project.SourceImageFile = "source/source_image.png";
-
-            using var archive = ZipFile.Open(dialog.FileName, ZipArchiveMode.Create);
-            if (!string.IsNullOrEmpty(_loadedImagePath) && File.Exists(_loadedImagePath))
-            {
-                archive.CreateEntryFromFile(_loadedImagePath, project.SourceImageFile);
-            }
-
-            for (int i = 0; i < _layers.Count; i++)
-            {
-                var layer = _layers[i];
-
-                if (layer.Mask is null)
-                    continue;
-
-                string maskFile = $"masks/layer_{i}.mask";
-
-                project.Layers.Add(new ProjectLayerSaveModel
-                {
-                    Name = layer.Name,
-                    IsVisible = layer.IsVisible,
-                    Opacity = layer.Opacity,
-                    LayerThickness = layer.LayerThickness,
-                    MaskWidth = layer.Mask.Width,
-                    MaskHeight = layer.Mask.Height,
-                    MaskFile = maskFile
-                });
-
-                var maskEntry = archive.CreateEntry(maskFile);
-                using var maskStream = maskEntry.Open();
-                maskStream.Write(layer.Mask.Alpha, 0, layer.Mask.Alpha.Length);
-            }
-
-            var json = JsonSerializer.Serialize(project, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            });
-
-            var projectEntry = archive.CreateEntry("project.json");
-            using var projectStream = projectEntry.Open();
-            using var writer = new StreamWriter(projectStream);
-            writer.Write(json);
-
+            SaveProjectToFile(dialog.FileName);
             ImageStatus.Content = $"Project saved: {Path.GetFileName(dialog.FileName)}";
         }
         catch (Exception ex)
@@ -849,6 +817,93 @@ public partial class MainWindow : Window
                 "Save error",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
+        }
+    }
+    private void SaveProjectToFile(string filePath)
+    {
+
+        if (File.Exists(filePath))
+            File.Delete(filePath);
+
+        var project = new ProjectSaveModel();
+        project.SourceImageFile = "source/source_image.png";
+
+        using var archive = ZipFile.Open(filePath, ZipArchiveMode.Create);
+
+        if (!string.IsNullOrEmpty(_loadedImagePath) && File.Exists(_loadedImagePath))
+        {
+            archive.CreateEntryFromFile(_loadedImagePath, project.SourceImageFile);
+        }
+
+        for (int i = 0; i < _layers.Count; i++)
+        {
+            var layer = _layers[i];
+
+            if (layer.Mask is null)
+                continue;
+
+            string maskFile = $"masks/layer_{i}.mask";
+
+            project.Layers.Add(new ProjectLayerSaveModel
+            {
+                Name = layer.Name,
+                IsVisible = layer.IsVisible,
+                Opacity = layer.Opacity,
+                LayerThickness = layer.LayerThickness,
+                MaskWidth = layer.Mask.Width,
+                MaskHeight = layer.Mask.Height,
+                MaskFile = maskFile
+            });
+
+            var maskEntry = archive.CreateEntry(maskFile);
+            using var maskStream = maskEntry.Open();
+            maskStream.Write(layer.Mask.Alpha, 0, layer.Mask.Alpha.Length);
+        }
+
+        var json = JsonSerializer.Serialize(project, new JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+
+        var projectEntry = archive.CreateEntry("project.json");
+        using var projectStream = projectEntry.Open();
+        using var writer = new StreamWriter(projectStream);
+        writer.Write(json);
+    }
+    private void AutoSaveProject()
+    {
+        if (_loadedBitmap is null || _layers.Count == 0)
+            return;
+
+        try
+        {
+            string? directory = Path.GetDirectoryName(_autosavePath);
+
+            if (string.IsNullOrEmpty(directory))
+                return;
+
+            Directory.CreateDirectory(directory);
+
+            string tempPath = Path.Combine(
+                directory,
+                $"autosave_{Guid.NewGuid():N}.tmp");
+
+            SaveProjectToFile(tempPath);
+
+            if (File.Exists(_autosavePath))
+                File.Delete(_autosavePath);
+
+            File.Move(tempPath, _autosavePath);
+
+            ImageStatus.Content = "Autosaved";
+        }
+        catch (IOException)
+        {
+            ImageStatus.Content = "Autosave skipped";
+        }
+        catch
+        {
+            // Autosave nie powinien przerywać pracy.
         }
     }
     private void OpenProject_Click(object sender, RoutedEventArgs e)
@@ -862,76 +917,12 @@ public partial class MainWindow : Window
         if (dialog.ShowDialog() != true)
             return;
 
-        try
-        {
-            using var archive = ZipFile.OpenRead(dialog.FileName);
+        try { 
 
-            var projectEntry = archive.GetEntry("project.json");
-            if (projectEntry is null)
-                throw new InvalidOperationException("project.json not found.");
+        LoadProjectFromFile(dialog.FileName);
 
-            ProjectSaveModel? project;
-            using (var stream = projectEntry.Open())
-            {
-                project = JsonSerializer.Deserialize<ProjectSaveModel>(stream);
-            }
-
-            if (project is null)
-                throw new InvalidOperationException("Could not read project.json.");
-
-            var imageEntry = archive.GetEntry(project.SourceImageFile);
-            if (imageEntry is null)
-                throw new InvalidOperationException("Source image not found.");
-
-            BitmapImage bitmap;
-            using (var imageStream = imageEntry.Open())
-            using (var memoryStream = new MemoryStream())
-            {
-                imageStream.CopyTo(memoryStream);
-                memoryStream.Position = 0;
-
-                bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.StreamSource = memoryStream;
-                bitmap.EndInit();
-                bitmap.Freeze();
-            }
-
-            _loadedBitmap = bitmap;
-            _loadedImagePath = null;
-
-            _layers.Clear();
-
-            foreach (var savedLayer in project.Layers)
-            {
-                var layer = new CardLayer(savedLayer.Name)
-                {
-                    IsVisible = savedLayer.IsVisible,
-                    Opacity = savedLayer.Opacity,
-                    LayerThickness = savedLayer.LayerThickness,
-                    ImageSource = bitmap,
-                    Mask = new LayerMask(savedLayer.MaskWidth, savedLayer.MaskHeight)
-                };
-
-                var maskEntry = archive.GetEntry(savedLayer.MaskFile);
-                if (maskEntry is not null && layer.Mask is not null)
-                {
-                    using var maskStream = maskEntry.Open();
-                    maskStream.ReadExactly(layer.Mask.Alpha);
-                }
-
-                if (layer.Mask is not null)
-                    layer.MaskImageSource = CreateMaskImageSource(layer.Mask);
-
-                _layers.Add(layer);
-            }
-
-            CanvasPlaceholder.Visibility = Visibility.Collapsed;
-            LayersListBox.SelectedIndex = _layers.Count > 0 ? 0 : -1;
-
-            ImageStatus.Content = $"Project loaded: {Path.GetFileName(dialog.FileName)}";
-            Title = $"CardForge 3D - {Path.GetFileName(dialog.FileName)}";
+        ImageStatus.Content = $"Project loaded: {Path.GetFileName(dialog.FileName)}";
+        Title = $"CardForge 3D - {Path.GetFileName(dialog.FileName)}";
         }
         catch (Exception ex)
         {
@@ -1007,6 +998,33 @@ public partial class MainWindow : Window
                 Path.Combine(dialog.FolderName, "manifest.json"),
                 manifestJson);
 
+            double totalThickness = _layers
+    .Where(layer => layer.IsVisible)
+    .Sum(layer => layer.LayerThickness);
+
+            string readme = $"""
+                                CardForge 3D Export
+
+                                Layers exported: {exported}
+                                Total thickness: {totalThickness:0.0} mm
+                                Default Riftbound card thickness: 0.3 mm
+
+                                Suggested workflow:
+                                1. Print all layer PNG files.
+                                2. Cut transparent areas from each layer.
+                                3. Stack layers from lowest to highest.
+                                4. Use spacers based on LayerThickness.
+                                5. Glue carefully to avoid warping.
+
+                                Export structure:
+                                - layers/        -> PNG layers
+                                - manifest.json  -> metadata
+                                - README.txt     -> instructions
+                                """;
+
+            File.WriteAllText(
+                Path.Combine(dialog.FolderName, "README.txt"),
+                readme);
             ImageStatus.Content = $"Exported {exported} layers with manifest";
         }
         catch (Exception ex)
@@ -1067,5 +1085,107 @@ public partial class MainWindow : Window
         }
 
         return fileName;
+    }
+    private void TryRecoverAutosave()
+    {
+        if (_hasRecoveredAutosave)
+            return;
+
+        if (!File.Exists(_autosavePath))
+            return;
+
+        var result = MessageBox.Show(
+            "Found an autosaved project from a previous session.\n\nDo you want to recover it?",
+            "Recover autosave",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (result != MessageBoxResult.Yes)
+            return;
+
+        try
+        {
+            LoadProjectFromFile(_autosavePath);
+
+            _hasRecoveredAutosave = true;
+            ImageStatus.Content = "Recovered autosave";
+            Title = "CardForge 3D - Recovered Autosave";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Could not recover autosave.\n\n{ex.Message}",
+                "Autosave recovery error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+    private void LoadProjectFromFile(string filePath)
+    {
+        using var archive = ZipFile.OpenRead(filePath);
+
+        var projectEntry = archive.GetEntry("project.json");
+        if (projectEntry is null)
+            throw new InvalidOperationException("project.json not found.");
+
+        ProjectSaveModel? project;
+        using (var stream = projectEntry.Open())
+        {
+            project = JsonSerializer.Deserialize<ProjectSaveModel>(stream);
+        }
+
+        if (project is null)
+            throw new InvalidOperationException("Could not read project.json.");
+
+        var imageEntry = archive.GetEntry(project.SourceImageFile);
+        if (imageEntry is null)
+            throw new InvalidOperationException("Source image not found.");
+
+        BitmapImage bitmap;
+        using (var imageStream = imageEntry.Open())
+        using (var memoryStream = new MemoryStream())
+        {
+            imageStream.CopyTo(memoryStream);
+            memoryStream.Position = 0;
+
+            bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.StreamSource = memoryStream;
+            bitmap.EndInit();
+            bitmap.Freeze();
+        }
+
+        _loadedBitmap = bitmap;
+        _loadedImagePath = null;
+
+        _layers.Clear();
+
+        foreach (var savedLayer in project.Layers)
+        {
+            var layer = new CardLayer(savedLayer.Name)
+            {
+                IsVisible = savedLayer.IsVisible,
+                Opacity = savedLayer.Opacity,
+                LayerThickness = savedLayer.LayerThickness,
+                ImageSource = bitmap,
+                Mask = new LayerMask(savedLayer.MaskWidth, savedLayer.MaskHeight)
+            };
+
+            var maskEntry = archive.GetEntry(savedLayer.MaskFile);
+            if (maskEntry is not null && layer.Mask is not null)
+            {
+                using var maskStream = maskEntry.Open();
+                maskStream.ReadExactly(layer.Mask.Alpha);
+            }
+
+            if (layer.Mask is not null)
+                layer.MaskImageSource = CreateMaskImageSource(layer.Mask);
+
+            _layers.Add(layer);
+        }
+
+        CanvasPlaceholder.Visibility = Visibility.Collapsed;
+        LayersListBox.SelectedIndex = _layers.Count > 0 ? 0 : -1;
     }
 }
